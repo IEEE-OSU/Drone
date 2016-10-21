@@ -1,0 +1,93 @@
+/* Linear_System_Solver_LU_Crout
+ *  Solves a nxn system of linear equations, but 4x4 used here.
+ *  Ax = b with the following dimensions
+ *  A = (dxd), x =(d,1), b = (b,1)
+ *  Uses LU decomposition and Crout's Method
+ *  Functions "Crout" and "solveCrout" from:
+ *  http://www.sci.utah.edu/~wallstedt/LU.htm
+ *  
+ *  Created by: Roger Kassouf (10/21/2016)
+ */
+
+// Matrix Math
+int d = 4; // Base dimension of the system
+double S[d][d] = {
+  {-3,  9, -18,  21},
+  { 2, -6,  13, -16},
+  { 3, -6,  14, -13},
+  {-2,  7, -14,  17} 
+}; // S is the source (input) matrix.
+double b[d] = {-6, 2, 8, -3}; // b is the coefficients vector
+double x[d] = {0, 0, 0, 0}; // x is the linear system solution
+/* S and b were given as examples to test the sketch. 
+ *  The expected solution is x = {3, -2, 0, 1};
+ */
+double D[d][d] =  {
+  {0, 0, 0, 0},
+  {0, 0, 0, 0},
+  {0, 0, 0, 0},
+  {0, 0, 0, 0}
+} // Destination matrix initialization.
+
+void setup() {
+  // put your setup code here, to run once:
+  Serial.begin(9600);
+}
+
+void loop() {
+  // put your main code here, to run repeatedly:
+  
+  // start the timer:
+  unsigned int timeToSolve = 0;
+  
+  Crout(d,&S,&D);
+  /* Crout outputs an LU-decomposed matrix at D.
+   *  This is then used as the argument for the next function.
+   */
+  solveCrout(d,&D,&b,&x);
+  /* solveCrout takes the LU-decomposed matrix D and solves the
+   *  linear system of equations defined by the constant vector
+   *  b. The solution updates to the vector x.
+   */
+
+   // end the timer:
+   time = micros();
+
+   // Print the solution
+   for (int i=0; i<d; i++) {
+    Serial.print(x[i]);
+    Serial.println(" ");
+   }
+   // Print the time to execute
+   Serial.print("Elapsed time: ");
+   Serial.println(timeToSolve);
+}
+
+// Crout uses unit diagonals for the upper triangle
+void Crout(int d,double*S,double*D){
+   for(int k=0;k<d;++k){
+      for(int i=k;i<d;++i){
+         double sum=0.;
+         for(int p=0;p<k;++p)sum+=D[i*d+p]*D[p*d+k];
+         D[i*d+k]=S[i*d+k]-sum; // not dividing by diagonals
+      }
+      for(int j=k+1;j<d;++j){
+         double sum=0.;
+         for(int p=0;p<k;++p)sum+=D[k*d+p]*D[p*d+j];
+         D[k*d+j]=(S[k*d+j]-sum)/D[k*d+k];
+      }
+   }
+}
+void solveCrout(int d,double*LU,double*b,double*x){
+   double y[d];
+   for(int i=0;i<d;++i){
+      double sum=0.;
+      for(int k=0;k<i;++k)sum+=LU[i*d+k]*y[k];
+      y[i]=(b[i]-sum)/LU[i*d+i];
+   }
+   for(int i=d-1;i>=0;--i){
+      double sum=0.;
+      for(int k=i+1;k<d;++k)sum+=LU[i*d+k]*x[k];
+      x[i]=(y[i]-sum); // not dividing by diagonals
+   }
+}
