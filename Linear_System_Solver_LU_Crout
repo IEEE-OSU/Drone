@@ -10,24 +10,24 @@
  */
 
 // Matrix Math
-int d = 4; // Base dimension of the system
-double S[d][d] = {
-  {-3,  9, -18,  21},
-  { 2, -6,  13, -16},
-  { 3, -6,  14, -13},
-  {-2,  7, -14,  17} 
-}; // S is the source (input) matrix.
+const int d = 4; // Base dimension of the system
+double S[d*d] = {
+  -3,  9, -18,  21,
+   2, -6,  13, -16,
+   3, -6,  14, -13,
+  -2,  7, -14,  17 
+}; // Smat is the source (input) matrix.
 double b[d] = {-6, 2, 8, -3}; // b is the coefficients vector
-double x[d] = {0, 0, 0, 0}; // x is the linear system solution
+double x[d] = {0., 0., 0., 0.}; // x is the linear system solution
 /* S and b were given as examples to test the sketch. 
  *  The expected solution is x = {3, -2, 0, 1};
  */
-double D[d][d] =  {
-  {0, 0, 0, 0},
-  {0, 0, 0, 0},
-  {0, 0, 0, 0},
-  {0, 0, 0, 0}
-} // Destination matrix initialization.
+double D[d*d] =  { 
+  0., 0., 0., 0.,
+  0., 0., 0., 0.,
+  0., 0., 0., 0.,
+  0., 0., 0., 0.
+}; // Destination matrix initialization.
 
 void setup() {
   // put your setup code here, to run once:
@@ -40,18 +40,18 @@ void loop() {
   // start the timer:
   unsigned int timeToSolve = 0;
   
-  Crout(d,&S,&D);
+  Crout(d,S,D);
   /* Crout outputs an LU-decomposed matrix at D.
    *  This is then used as the argument for the next function.
    */
-  solveCrout(d,&D,&b,&x);
+  solveCrout(d,D,b,x);
   /* solveCrout takes the LU-decomposed matrix D and solves the
    *  linear system of equations defined by the constant vector
    *  b. The solution updates to the vector x.
    */
 
    // end the timer:
-   time = micros();
+   timeToSolve = micros();
 
    // Print the solution
    for (int i=0; i<d; i++) {
@@ -61,10 +61,15 @@ void loop() {
    // Print the time to execute
    Serial.print("Elapsed time: ");
    Serial.println(timeToSolve);
+
+  // Reset D to perform the tests again.
+  for (int i=0; i<(d*d); i++) {
+    D[i] = 0;
+  }
 }
 
 // Crout uses unit diagonals for the upper triangle
-void Crout(int d,double*S,double*D){
+void Crout(int d,double S[],double D[]){
    for(int k=0;k<d;++k){
       for(int i=k;i<d;++i){
          double sum=0.;
@@ -78,7 +83,7 @@ void Crout(int d,double*S,double*D){
       }
    }
 }
-void solveCrout(int d,double*LU,double*b,double*x){
+void solveCrout(int d,double LU[],double b[],double x[]){
    double y[d];
    for(int i=0;i<d;++i){
       double sum=0.;
