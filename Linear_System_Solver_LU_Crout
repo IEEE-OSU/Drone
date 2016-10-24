@@ -10,24 +10,32 @@
  */
 
 // Matrix Math
-const int d = 4; // Base dimension of the system
-double S[d*d] = {
-  -3,  9, -18,  21,
-   2, -6,  13, -16,
-   3, -6,  14, -13,
-  -2,  7, -14,  17 
+int d = 4; // Dimension of the system
+double A[16] = {
+  -3.,  4., -2.,  2.,
+   4.,  9., -3.,  5.,
+  -2., -3.,  7.,  6.,
+   1.,  4.,  6.,  7. 
 }; // Smat is the source (input) matrix.
-double b[d] = {-6, 2, 8, -3}; // b is the coefficients vector
-double x[d] = {0., 0., 0., 0.}; // x is the linear system solution
-/* S and b were given as examples to test the sketch. 
- *  The expected solution is x = {3, -2, 0, 1};
+double b[4] = {2., 8., 10., 2.}; // b is the coefficients vector
+double x[4]; // x is the linear system solution
+/* A and b were given as examples to test the sketch. 
+ *  The expected solution is:
+ *  -2.15384615384616
+ *  -1.15384615384615
+ *  -2.84615384615385
+ *   3.69230769230769
+ * That is using MATLAB. However the C++ implementation yields:
+ *  0.512479000000000
+ * -2.26123000000000
+ * -2.57737000000000
+ *  3.71381000000000
  */
-double D[d*d] =  { 
-  0., 0., 0., 0.,
-  0., 0., 0., 0.,
-  0., 0., 0., 0.,
-  0., 0., 0., 0.
-}; // Destination matrix initialization.
+double LU[16]; // Destination matrix initialization.
+
+unsigned int timeToSolve = 0;
+long int previousMicros = 0;
+long int currentMicros = 0;
 
 void setup() {
   // put your setup code here, to run once:
@@ -38,21 +46,23 @@ void loop() {
   // put your main code here, to run repeatedly:
   
   // start the timer:
-  unsigned int timeToSolve = 0;
+  timeToSolve = 0;
+  previousMicros = micros();
   
-  Crout(d,S,D);
-  /* Crout outputs an LU-decomposed matrix at D.
+  Crout(4,A,LU);
+  /* Crout outputs an LU-decomposed matrix.
    *  This is then used as the argument for the next function.
    */
-  solveCrout(d,D,b,x);
-  /* solveCrout takes the LU-decomposed matrix D and solves the
+  solveCrout(4,LU,b,x);
+  /* solveCrout takes the LU-decomposed matrix and solves the
    *  linear system of equations defined by the constant vector
    *  b. The solution updates to the vector x.
    */
 
    // end the timer:
-   timeToSolve = micros();
-
+   currentMicros = micros();
+   timeToSolve = currentMicros - previousMicros;
+   
    // Print the solution
    for (int i=0; i<d; i++) {
     Serial.print(x[i]);
@@ -64,12 +74,13 @@ void loop() {
 
   // Reset D to perform the tests again.
   for (int i=0; i<(d*d); i++) {
-    D[i] = 0;
+    LU[i] = 0;
   }
+  delay(1000);
 }
 
 // Crout uses unit diagonals for the upper triangle
-void Crout(int d,double S[],double D[]){
+void Crout(int d,double*S,double*D){
    for(int k=0;k<d;++k){
       for(int i=k;i<d;++i){
          double sum=0.;
@@ -83,7 +94,7 @@ void Crout(int d,double S[],double D[]){
       }
    }
 }
-void solveCrout(int d,double LU[],double b[],double x[]){
+void solveCrout(int d,double*LU,double*b,double*x){
    double y[d];
    for(int i=0;i<d;++i){
       double sum=0.;
