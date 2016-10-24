@@ -11,27 +11,31 @@
 
 // Matrix Math
 int d = 4; // Dimension of the system
-double A[16] = {
+float A[16] = {
   -3.,  4., -2.,  2.,
    4.,  9., -3.,  5.,
   -2., -3.,  7.,  6.,
    1.,  4.,  6.,  7. 
 }; // Smat is the source (input) matrix.
-double b[4] = {2., 8., 10., 2.}; // b is the coefficients vector
-double x[4]; // x is the linear system solution
+float b[4] = {2., 8., 10., 2.}; // b is the coefficients vector
+float x[4]; // x is the linear system solution
 /* A and b were given as examples to test the sketch. 
- *  The expected solution is:
- *  -2.15384615384616
- *  -1.15384615384615
- *  -2.84615384615385
- *   3.69230769230769
- * That is using MATLAB. However the C++ implementation yields:
- *  0.512479000000000
- * -2.26123000000000
- * -2.57737000000000
- *  3.71381000000000
+ *  This is the result of testing on an Arduino Uno:
+ *  0.51247863 
+ * -2.26123094 
+ * -2.57737040 
+ *  3.71380949 
+ *  Elapsed time: 1036 microseconds
+ *
+ * The expected solution was verified by Wolfram Alpha.
+ *  0.512479
+ * -2.26123
+ * -2.57737
+ *  3.71381
+ *  
+ *  This gives a small ~= 0.00001 roundoff error
  */
-double LU[16]; // Destination matrix initialization.
+float LU[16]; // Destination matrix initialization.
 
 unsigned int timeToSolve = 0;
 long int previousMicros = 0;
@@ -65,44 +69,45 @@ void loop() {
    
    // Print the solution
    for (int i=0; i<d; i++) {
-    Serial.print(x[i]);
+    Serial.print(x[i],8);
     Serial.println(" ");
    }
    // Print the time to execute
    Serial.print("Elapsed time: ");
-   Serial.println(timeToSolve);
+   Serial.print(timeToSolve);
+   Serial.println(" microseconds");
 
   // Reset D to perform the tests again.
   for (int i=0; i<(d*d); i++) {
     LU[i] = 0;
   }
-  delay(1000);
+  delay(5000);
 }
 
 // Crout uses unit diagonals for the upper triangle
-void Crout(int d,double*S,double*D){
+void Crout(int d,float*S,float*D){
    for(int k=0;k<d;++k){
       for(int i=k;i<d;++i){
-         double sum=0.;
+         float sum=0.;
          for(int p=0;p<k;++p)sum+=D[i*d+p]*D[p*d+k];
          D[i*d+k]=S[i*d+k]-sum; // not dividing by diagonals
       }
       for(int j=k+1;j<d;++j){
-         double sum=0.;
+         float sum=0.;
          for(int p=0;p<k;++p)sum+=D[k*d+p]*D[p*d+j];
          D[k*d+j]=(S[k*d+j]-sum)/D[k*d+k];
       }
    }
 }
-void solveCrout(int d,double*LU,double*b,double*x){
-   double y[d];
+void solveCrout(int d,float*LU,float*b,float*x){
+   float y[d];
    for(int i=0;i<d;++i){
-      double sum=0.;
+      float sum=0.;
       for(int k=0;k<i;++k)sum+=LU[i*d+k]*y[k];
       y[i]=(b[i]-sum)/LU[i*d+i];
    }
    for(int i=d-1;i>=0;--i){
-      double sum=0.;
+      float sum=0.;
       for(int k=i+1;k<d;++k)sum+=LU[i*d+k]*x[k];
       x[i]=(y[i]-sum); // not dividing by diagonals
    }
