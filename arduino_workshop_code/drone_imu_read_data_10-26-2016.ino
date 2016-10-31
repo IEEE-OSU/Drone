@@ -1,5 +1,5 @@
 /* Practice reading IMU for drone project
- *  Author: Aaron Pycraft
+ *  Author: Aaron Pycraft, Phil Shvartsman
  *  Date: 10-26-2016
  *  Heavily borrowed from: sparkfun MPU2250BasicsAHRS
  */
