@@ -1,5 +1,5 @@
 /* Practice reading IMU for drone project
- *  Author: Aaron Pycraft, Phil Shvartsman
+ *  Author: Aaron Pycraft
  *  Date: 10-26-2016
  *  Heavily borrowed from: sparkfun MPU2250BasicsAHRS
  */
@@ -33,8 +33,7 @@ void loop() {
   uint8_t accelZ = 0x3F; //high byte
   uint8_t reading = readByte(MPU9250_ADDRESS, accelZ);
   //-- need to combind high byte and low byte to get complete 2 byte value
-  
-  delay(500);
+ 
   Serial.print("reading = ");
   Serial.println(reading);
 }

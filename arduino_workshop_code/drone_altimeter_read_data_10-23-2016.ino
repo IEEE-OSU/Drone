@@ -51,25 +51,11 @@ void setup()
 
 void loop()
 {
-  //float altitude = myPressure.readAltitude();
-  //Serial.print("Altitude(m):");
-  //Serial.print(altitude, 2);
-
   float altitude = myPressure.readAltitudeFt();
   Serial.print(" Altitude(ft):");
   Serial.print(altitude, 2);
-
-  //float pressure = myPressure.readPressure();
-  //Serial.print("Pressure(Pa):");
-  //Serial.print(pressure, 2);
-
-  //float temperature = myPressure.readTemp();
-  //Serial.print(" Temp(c):");
-  //Serial.print(temperature, 2);
-
+  
   float temperature = myPressure.readTempF();
   Serial.print(" Temp(f):");
-  Serial.print(temperature, 2);
-
-  Serial.println();
+  Serial.println(temperature, 2);
 }
