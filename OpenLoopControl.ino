@@ -13,16 +13,25 @@ const float kY = 1; // kY can be assigned at will
 // Define input variables to be passed
 int inU = 0; int inR = 0; int inP = 0; int inY = 0;
 
-// List the range of integer values present for the control
-// signals when they are pulled from the receiver (placeholders)
-int inLow = 0; int inHigh = 255;
+/* List the range of integer values present for the control
+  signals when they are pulled from the receiver.
+  This is known based on ReceiverInterruptAndWritingTest2.ino found in
+  this repository. (1/17/16)
+  This range is an empirically adjusted range for transmitter-receiver inputs.
+  The original PPM are in multples of 4, so this scales down so that each is a
+  unique integer. There are an odd number of integers, implying a theoretical
+  zero-point for the roll, pitch and yaw.
+*/
+int inLow = 266; int inHigh = 468;
 
 // Solve the maximum range of the input-end mapping function
 float Nmax = sqrt((1 / (4 * kT)) + (1 / (2 * kI*kT)) + (1 / (4 * kY)));
 
-// List the range of integer values used to output speeds for the ESCs
-// (again, placeholders)
-int outLow = 0; int outHigh = 255;
+/* List the range of integer values used to output speeds for the ESCs.
+ This is known based on ReceiverInterruptAndWritingTest2.ino found in
+ this repository. (1/17/16) It uses the Servo library to generate PPM.
+*/
+int outLow = 20; int outHigh = 180;
 
 // Define output variables for each motor
 int M1 = 0; int M2 = 0; int M3 = 0; int M4 = 0; 
