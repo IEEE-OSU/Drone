@@ -91,7 +91,7 @@ void convertRaws(){
 int processPinInput(unsigned int value){
   int processedInput;
   int newVal = constrain(value / 4, INPUT_MIN, INPUT_MAX);
-  processedInput = map(newVal, INPUT_MIN, INPUT_MAX, 20, 180);
+  processedInput = map(newVal, INPUT_MIN, INPUT_MAX, CONTROL_MIN, CONTROL_MAX);
   return processedInput;
 }
 
