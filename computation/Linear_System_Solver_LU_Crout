@@ -1,0 +1,114 @@
+/* Linear_System_Solver_LU_Crout
+ *  Solves a nxn system of linear equations, but 4x4 used here.
+ *  Ax = b with the following dimensions
+ *  A = (dxd), x =(d,1), b = (b,1)
+ *  Uses LU decomposition and Crout's Method
+ *  Functions "Crout" and "solveCrout" from:
+ *  http://www.sci.utah.edu/~wallstedt/LU.htm
+ *  
+ *  Created by: Roger Kassouf (10/21/2016)
+ */
+
+// Matrix Math
+int d = 4; // Dimension of the system
+float A[16] = {
+  -3.,  4., -2.,  2.,
+   4.,  9., -3.,  5.,
+  -2., -3.,  7.,  6.,
+   1.,  4.,  6.,  7. 
+}; // Smat is the source (input) matrix.
+float b[4] = {2., 8., 10., 2.}; // b is the coefficients vector
+float x[4]; // x is the linear system solution
+/* A and b were given as examples to test the sketch. 
+ *  This is the result of testing on an Arduino Uno:
+ *  0.51247863 
+ * -2.26123094 
+ * -2.57737040 
+ *  3.71380949 
+ *  Elapsed time: 1036 microseconds
+ *
+ * The expected solution was verified by Wolfram Alpha.
+ *  0.512479
+ * -2.26123
+ * -2.57737
+ *  3.71381
+ *  
+ *  This gives a small ~= 0.00001 roundoff error
+ */
+float LU[16]; // Destination matrix initialization.
+
+unsigned int timeToSolve = 0;
+long int previousMicros = 0;
+long int currentMicros = 0;
+
+void setup() {
+  // put your setup code here, to run once:
+  Serial.begin(9600);
+}
+
+void loop() {
+  // put your main code here, to run repeatedly:
+  
+  // start the timer:
+  timeToSolve = 0;
+  previousMicros = micros();
+  
+  Crout(4,A,LU);
+  /* Crout outputs an LU-decomposed matrix.
+   *  This is then used as the argument for the next function.
+   */
+  solveCrout(4,LU,b,x);
+  /* solveCrout takes the LU-decomposed matrix and solves the
+   *  linear system of equations defined by the constant vector
+   *  b. The solution updates to the vector x.
+   */
+
+   // end the timer:
+   currentMicros = micros();
+   timeToSolve = currentMicros - previousMicros;
+   
+   // Print the solution
+   for (int i=0; i<d; i++) {
+    Serial.print(x[i],8);
+    Serial.println(" ");
+   }
+   // Print the time to execute
+   Serial.print("Elapsed time: ");
+   Serial.print(timeToSolve);
+   Serial.println(" microseconds");
+
+  // Reset D to perform the tests again.
+  for (int i=0; i<(d*d); i++) {
+    LU[i] = 0;
+  }
+  delay(5000);
+}
+
+// Crout uses unit diagonals for the upper triangle
+void Crout(int d,float*S,float*D){
+   for(int k=0;k<d;++k){
+      for(int i=k;i<d;++i){
+         float sum=0.;
+         for(int p=0;p<k;++p)sum+=D[i*d+p]*D[p*d+k];
+         D[i*d+k]=S[i*d+k]-sum; // not dividing by diagonals
+      }
+      for(int j=k+1;j<d;++j){
+         float sum=0.;
+         for(int p=0;p<k;++p)sum+=D[k*d+p]*D[p*d+j];
+         D[k*d+j]=(S[k*d+j]-sum)/D[k*d+k];
+      }
+   }
+}
+void solveCrout(int d,float*LU,float*b,float*x){
+   float y[d];
+   for(int i=0;i<d;++i){
+      float sum=0.;
+      for(int k=0;k<i;++k)sum+=LU[i*d+k]*y[k];
+      y[i]=(b[i]-sum)/LU[i*d+i];
+   }
+   for(int i=d-1;i>=0;--i){
+      float sum=0.;
+      for(int k=i+1;k<d;++k)sum+=LU[i*d+k]*x[k];
+      x[i]=(y[i]-sum); // not dividing by diagonals
+   }
+}
