@@ -75,10 +75,11 @@ void loop() {
 }
 
 void convertRaws(){
-    roll = processPinInput(pin2Raw);
+    roll = deadZone(processPinInput(pin2Raw),2);
     throttle = processPinInput(pin18Raw);
-    pitch = processPinInput(pin3Raw);
-    yaw = processPinInput(pin19Raw);
+    // throttle is not subjected to dead zones.
+    pitch = deadZone(processPinInput(pin3Raw),2);
+    yaw = deadZone(processPinInput(pin19Raw),2);
 }
 
 int processPinInput(unsigned int value){
@@ -86,6 +87,16 @@ int processPinInput(unsigned int value){
   int newVal = constrain(value / 4, INPUT_MIN, INPUT_MAX);
   processedInput = map(newVal, INPUT_MIN, INPUT_MAX, 20, 180);
   return processedInput;
+}
+
+int deadZone(int inValue, int deadZoneBand) {
+  /* deadZone imposes a dead zone around 100 of the size +- deadZoneBand.
+   *  When it passes the deadzone check, it simply passes inValue.
+   */
+   if (abs(inValue-100) <= deadZoneBand) {
+    inValue = 100;
+   }
+   return inValue;
 }
 
 void writeOutputs(){
@@ -143,4 +154,3 @@ void pin19FallingISR(){
   attachInterrupt(digitalPinToInterrupt(19), pin19RisingISR, RISING);  
 }
   
-
