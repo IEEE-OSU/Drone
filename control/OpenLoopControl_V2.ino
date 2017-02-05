@@ -93,11 +93,15 @@ const unsigned int deadZoneConstant = 3;
 
  *  ** IMPORTANT ** All values must be greater than 0!
 */
-const float kT = 1;
-const float kI = 1;
-const float kY = 1;
-const float Nmax = sqrt((1 / (4 * kT)) + (1 / (2 * kI*kT)) + (1 / (4 * kY)));
-const float Nmaxsquared = (1 / (4 * kT)) + (1 / (2 * kI*kT)) + (1 / (4 * kY));
+const float speedWidth=0.2;
+const float tiltYaw=2;
+
+const float kT = 4-(2*kI)-kY;
+const float kI = (tiltYaw/2)*kY;
+const float kY = speedWidth/(1+(tiltYaw/2));
+const float TCut=2*speedWidth/kT;
+//const float Nmax = sqrt((1 / (4 * kT)) + (1 / (2 * kI*kT)) + (1 / (4 * kY)));
+//const float Nmaxsquared = (1 / (4 * kT)) + (1 / (2 * kI*kT)) + (1 / (4 * kY));
 
 // ~A7. Output pins and Servo objects
 /* NOTES: Every motor will be given a Servo object correlated to some output pin.
@@ -317,26 +321,30 @@ void controlTransfer(unsigned int scaledInRoll, unsigned int scaledInPitch, unsi
   float P = mapIntToFloat(scaledInPitch, scaledInMin, scaledInMax, -1, 1);
   float U = mapIntToFloat(scaledInThrottle, scaledInMin, scaledInMax, 0, 1);
   float Y = mapIntToFloat(scaledInYaw, scaledInMin, scaledInMax, -1, 1);
-  // Step 2: Perform the CTM calculations for each motor
-  float Nsquared1 = (U / (4 * kT)) + (R / (2 * kI * kT)) + (Y / (4 * kY));
-  float Nsquared2 = (U / (4 * kT)) + (P / (2 * kI * kT)) - (Y / (4 * kY));
-  float Nsquared3 = (U / (4 * kT)) - (R / (2 * kI * kT)) + (Y / (4 * kY));
-  float Nsquared4 = (U / (4 * kT)) - (P / (2 * kI * kT)) - (Y / (4 * kY));
+      // Step 2: Perform the CTM calculations for each motor        
+    if(U<=TCut){
+       float N1=((kT*U)/4);
+       float N2=N1;
+       float N3=N1;
+       float N4=N1;
+    }else{
+       float N1 = ((kT*U)/4)+((kI*R)/2)+((kY*Y)/4);
+       float N2 = ((kT*U)/4) + ((kT*P)/2) - ((Y * kY)/4);
+       float N3 = ((kT*U)/4)-((kI*R)/2)+((kY*Y)/4);
+       float N4 = ((kT*U)/4) - ((kT*P)/2) - ((Y * kY)/4)
+    }
+
+           
   // Step 3: Constrain the squared speeds to [0, (Nmax)^2]
-  Nsquared1 = constrain(Nsquared1, 0, Nmaxsquared);
-  Nsquared2 = constrain(Nsquared2, 0, Nmaxsquared);
-  Nsquared3 = constrain(Nsquared3, 0, Nmaxsquared);
-  Nsquared4 = constrain(Nsquared4, 0, Nmaxsquared);
-  // Step 4: Take the square root of each
-  float N1 = sqrt(Nsquared1);
-  float N2 = sqrt(Nsquared2);
-  float N3 = sqrt(Nsquared3);
-  float N4 = sqrt(Nsquared4);
+  N1 = constrain(N1, 0, 1);
+  N2 = constrain(N2, 0, 1);
+  N3 = constrain(N3, 0, 1);
+  N4 = constrain(N4, 0, 1);
   // Step 5: Re-map the speed values to each motor
-  motorsOut[0] = mapFloatToInt(N1, 0, Nmax, servoMin, servoMax);
-  motorsOut[1] = mapFloatToInt(N2, 0, Nmax, servoMin, servoMax);
-  motorsOut[2] = mapFloatToInt(N3, 0, Nmax, servoMin, servoMax);
-  motorsOut[3] = mapFloatToInt(N4, 0, Nmax, servoMin, servoMax);
+  motorsOut[0] = mapFloatToInt(N1, 0, 1, servoMin, servoMax);
+  motorsOut[1] = mapFloatToInt(N2, 0, 1, servoMin, servoMax);
+  motorsOut[2] = mapFloatToInt(N3, 0, 1, servoMin, servoMax);
+  motorsOut[3] = mapFloatToInt(N4, 0, 1, servoMin, servoMax);
 }
 
 // ~C3.3 powerMotors
