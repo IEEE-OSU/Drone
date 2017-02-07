@@ -1,14 +1,12 @@
-/* OpenLoopControl_V2.ino
+/* OpenLoopControl.ino
 
-    Contributors: Roger Kassouf, Iwan Martin, Chen Liang
-    Date last modified: February 6, 2017
+    Contributors: Roger Kassouf, Iwan Martin, Chen Liang, Aaron Pycraft
+    Date last modified: February 7, 2017
 
-    Objective: This sketch aims to map real PPM inputs from the receiver, and
-    tranform them into real servo outputs to each motor.
+    Objective: This sketch maps PPM inputs from the receiver to servo outputs for each motor.
 
     INPUTS: Throttle, Roll, Pitch, Yaw
     OUTPUTS: Speeds of motors 1, 2, 3, 4
-
 */
 
 /*
@@ -17,10 +15,6 @@
     ===============================================================================
 */
 #include <Servo.h>
-/*
-    ===============================================================================
-*/
-
 
 /*
     ===============================================================================
@@ -30,16 +24,16 @@
     a reference in various points to reduce the amount of math required.
 */
 
-// ~A1. Pins established for raw inputs
+// ~A1. Arduino pins, established for raw inputs
 /* NOTES: all pins selected are interrupt-enabled pins. They are selected since
     pins 20 and 21 are reserved for the I2C communication protocol.
 */
-const unsigned int pinInRoll = 2; // CHANNEL 1
-const unsigned int pinInPitch = 3; // CHANNEL 2
-const unsigned int pinInThrottle = 18; // CHANNEL 3
-const unsigned int pinInYaw = 19; // CHANNEL 4
+const unsigned int pinInRoll = 2;       // tx CHANNEL 1
+const unsigned int pinInPitch = 3;      // tx CHANNEL 2
+const unsigned int pinInThrottle = 18;  // tx CHANNEL 3
+const unsigned int pinInYaw = 19;       // tx CHANNEL 4
 
-// ~A2. Limits for raw pin inputs
+// ~A2. Limits for pin raw inputs
 /* NOTES: variables defined in sections B.1. The selected limits were chosen since
     they are consistent across each input. This creates a two-tailed dead zone at
     the extremes of the stick.
@@ -76,23 +70,18 @@ const unsigned int deadZoneConstant = 3;
     
     ** PARAMETERS TO SELECT **
     speedWidth -- the absolute maximium difference in speed between two motors.
-    It must be between 0 and 1, so something like 0.20.
-    
+      It must be between 0 and 1, so something like 0.20.
     tiltYaw -- the ratio of speeds between tilting (roll and/or pitch) and the
-    yaw. Reasonably, you would want this greater than 1, but for sure greater
-    than 0. There is no true upper limit.
+      yaw. Reasonably, you would want this greater than 1, but for sure greater
+      than 0. There is no true upper limit.
     
     ** PARAMETERS CALCULATED **
-    
     kT -- Apportions part of the Throttle command to the motors.
-
     kI -- Apportions part of the Roll and Pitch commands to the motors.
-
     kY -- Apportions part of the Yaw command to the motors.
-    
     Tcut -- The throttle speed at which the control transfer will switch on the
-    rotational control. When T is less than Tcut, all motors will have the same
-    speed.
+      rotational control. When T is less than Tcut, all motors will have the same
+      speed.
     
     For a better description of each parameter, look in the controlTransfer function
 */
@@ -144,11 +133,6 @@ const unsigned int servoMax = 180;
 
 /*
     ===============================================================================
-*/
-
-
-/*
-    ===============================================================================
     ~B. STATE VARIABLES
     ===============================================================================
     These variables are subject to change, as they are used incrementally
@@ -197,11 +181,6 @@ unsigned int scaledInYawValue = 0;
 */
 unsigned int motorsOut[4] = {servoMin, servoMin, servoMin, servoMin};
 // Cells in incrememntal order: Motors 1, 2, 3, 4.
-
-/*
-    ===============================================================================
-*/
-
 
 /*
     ===============================================================================
@@ -377,34 +356,15 @@ void attachAllRisingInterrupts() {
 
 // ~C3.5 printResults
 void printResults() {
-  Serial.print("Throttle: ");
-  Serial.print(scaledInThrottleValue);
-  Serial.print("\t");
-  Serial.print("Roll: ");
-  Serial.print(scaledInRollValue);
-  Serial.print("\t");
-  Serial.print("Pitch: ");
-  Serial.print(scaledInPitchValue);
-  Serial.print("\t");
-  Serial.print("Yaw: ");
-  Serial.print(scaledInYawValue);
-  Serial.print("\t");
-  Serial.print("Motor 1: ");
-  Serial.print(motorsOut[0]);
-  Serial.print("\t");
-  Serial.print("Motor 2: ");
-  Serial.print(motorsOut[1]);
-  Serial.print("\t");
-  Serial.print("Motor 3: ");
-  Serial.print(motorsOut[2]);
-  Serial.print("\t");
-  Serial.print("Motor 4: ");
-  Serial.println(motorsOut[3]);
+  Serial.print("Throttle: " + scaledInThrottleValue + "\t");
+  Serial.print("Roll: "  +  scaledInRollValue + "\t");
+  Serial.print("Pitch: " +  scaledInPitchValue + "\t");
+  Serial.print("Yaw: "   +  scaledInYawValue + "\t");
+  Serial.print("Motor 1: " + motorsOut[0] + "\t");
+  Serial.print("Motor 2: " + motorsOut[1] + "\t");
+  Serial.print("Motor 3: " + motorsOut[2] + "\t");
+  Serial.println("Motor 4: " + motorsOut[3]);
 }
-/*
-    ===============================================================================
-*/
-
 
 /*
     ===============================================================================
