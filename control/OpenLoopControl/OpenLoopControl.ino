@@ -1,0 +1,37 @@
+/* OpenLoopControl.ino
+
+    Contributors: Roger Kassouf, Iwan Martin, Chen Liang, Aaron Pycraft
+    Date last modified: February 7, 2017
+
+    Objective: This sketch maps PPM inputs from the receiver to servo outputs for each motor.
+
+    INPUTS: Throttle, Roll, Pitch, Yaw
+    OUTPUTS: Speeds of motors 1, 2, 3, 4
+*/
+
+// Constants
+#include <Servo.h>
+#include "PinDefinitions.h"
+
+extern unsigned int scaledInRollValue, scaledInPitchValue, scaledInThrottleValue, scaledInYawValue;
+extern volatile boolean ISRcomplete;
+
+//--Setup to run once. 
+void setup() {
+  attachAllRisingInterrupts();
+  attachAllMotors();
+  Serial.begin(38400);
+}
+
+//--Main program loop
+void loop() {
+  if (ISRcomplete) {
+    scaleValues();
+    controlTransfer(scaledInRollValue, scaledInPitchValue, scaledInThrottleValue, scaledInYawValue);
+    powerMotors();
+    printResults();
+    ISRcomplete = false;
+  }
+}
+
+
