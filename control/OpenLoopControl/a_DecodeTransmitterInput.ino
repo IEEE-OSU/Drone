@@ -1,26 +1,27 @@
 /* a_DecodeTransmitterInput.ino
-
+  
     Author: Iwan Martin
     Contributors: Roger Kassouf, Iwan Martin, Chen Liang, Aaron Pycraft
     Date last modified: February 7, 2017
-
+  
     Objective: Uses arduino Interrupts to decode Tx signal.
-
+  
     INPUTS: Tx PPM signal (Throttle, Roll, Pitch, Yaw)
     OUTPUTS: Scaled tx values within [20, 180]
 */
-extern unsigned int motorsOut[];
 
-  /* The signal from the tx is a PPM signal. The tx sends throttle, pitch, roll, yaw 
-   *  on seperate channels as pulses. We can monitor these signals using arduino
-   *  interrupts to measure the length of pulse to get the value of the signal. 
-   *  
-   *  Interrupts can happen at any time. We want to wait for a full cycle of new 
-   *  inputs before processing the values. 
-   *  
-   *  Note: maybe this doesn't matter and we can actually process asynchronously 
-   *  - Aaron 2.7.17
-   */
+/* The signal from the tx is a PPM signal. The tx sends throttle, pitch, roll, yaw 
+ *  on seperate channels as pulses. We can monitor these signals using arduino
+ *  interrupts to measure the length of pulse to get the value of the signal. 
+ *  
+ *  Interrupts can happen at any time. We want to wait for a full cycle of new 
+ *  inputs before processing the values. 
+ *  
+ *  Note: maybe this doesn't matter and we can actually process asynchronously 
+ *  - Aaron 2.7.17
+*/
+
+extern unsigned int motorsOut[]; //defined in MotorControl
 
 // ~A2. Limits for pin raw inputs
 /* NOTES: variables defined in sections B.1. The selected limits were chosen since
@@ -47,66 +48,57 @@ const unsigned int scaledInMax = pinInMax / 4;
 */
 const unsigned int scaledInAvg = (scaledInMax + scaledInMin) / 2;
 
-
-
 // ~B4. Scaled input state values
 /* NOTES: This is just where the rawIn___Value values are stored
     after they are scaled by 4. The roll, pitch, and yaw will
     also be passed through the dead zone function.
 */
+ 
 #ifndef SCALED_TX_VALS
   #define SCALED_TX_VALS
-  unsigned int scaledInRollValue = 0;
-  unsigned int scaledInPitchValue = 0;
-  unsigned int scaledInThrottleValue = 0;
-  unsigned int scaledInYawValue = 0;
+  unsigned int scaledInRoll = 0;
+  unsigned int scaledInPitch = 0;
+  unsigned int scaledInThrottle = 0;
+  unsigned int scaledInYaw = 0;
 #endif
 
 
+//--The raw input states from the Interrupt Service Routine (ISR)
+//  functions. They will eventually be constrained by [pinInMin, pinInMax].
+volatile unsigned int rawInRoll = 0;
+volatile unsigned int rawInPitch = 0;
+volatile unsigned int rawInThrottle = 0;
+volatile unsigned int rawInYaw = 0;
 
-// ~B1. Raw input state values
-/* NOTES: The raw input states from the Interrupt Service Routine (ISR)
-    functions. They will eventually be constrained by [pinInMin, pinInMax].
-*/
-volatile unsigned int rawInRollValue = 0;
-volatile unsigned int rawInPitchValue = 0;
-volatile unsigned int rawInThrottleValue = 0;
-volatile unsigned int rawInYawValue = 0;
-
-// ~B2. Raw input state times
-/* NOTES: These are used with a timing routine in the ISR to then determine
-    what the value of each variable is.
-*/
+//--Values of throttle, roll, pitch, yaw are determined by length of their 
+//  pulse. Measured using the rise/fall time of each ISRs below.
 volatile unsigned int rawInRollTime = 0;
 volatile unsigned int rawInPitchTime = 0;
 volatile unsigned int rawInThrottleTime = 0;
 volatile unsigned int rawInYawTime = 0;
 
-/* 
-  File contains functions necessary for tx signal processing (using interrupts)
-*/
-
-// ~B3. Raw input ISR trigger
-/* NOTES: If ISRcomplete == 1, then it's done with its routines.
-*/
-volatile boolean ISRcomplete = false;
-
+//--Flag that denotes the end of a particular tx signal cycle. 
+volatile boolean ISRcomplete = false; //--true at the end of each tx signal cycle
 
 // ~C1. Interrupt Functions
-/* NOTES: These functions will be interrupt-enabled, and they will passively
-    read each PPM input pin to generate the input values. Note that to begin this
-    process, the Rising functions will need to be interrupt-enabled in the setup
-    loop. They will continue jutting in the sketch unless the detachInterrupt
-    function is called.
+/* Functions run asynchronously at rising/falling edges of each tx channel.
+    TX input vaules are interpretted from Tx PPM signal. Interrupts must start
+    as rising edge triggerred. Attached ISRs will continue until they are detached.
+
+    After a rising edge ISR is triggerred on a pin, the ISR has to setup a
+    falling edge ISR on that pin & vice-versa. We measure the time between rising/falling
+    edges to determine value of tx input.
+    (Can't have a rising/falling ISR simultaneously on a pin)
 */
 
+// ~C1.1 Roll
 void pinRollRisingISR() {
   rawInRollTime = micros();
   attachInterrupt(digitalPinToInterrupt(pinInRoll), pinRollFallingISR, FALLING);
 }
 
 void pinRollFallingISR() {
-  rawInRollValue = micros() - rawInRollTime;
+  rawInRoll = micros() - rawInRollTime;
   attachInterrupt(digitalPinToInterrupt(pinInRoll), pinRollRisingISR, RISING);
 }
 
@@ -117,7 +109,7 @@ void pinPitchRisingISR() {
 }
 
 void pinPitchFallingISR() {
-  rawInPitchValue = micros() - rawInPitchTime;
+  rawInPitch = micros() - rawInPitchTime;
   attachInterrupt(digitalPinToInterrupt(pinInPitch), pinPitchRisingISR, RISING);
 }
 
@@ -128,7 +120,7 @@ void pinThrottleRisingISR() {
 }
 
 void pinThrottleFallingISR() {
-  rawInThrottleValue = micros() - rawInThrottleTime;
+  rawInThrottle = micros() - rawInThrottleTime;
   attachInterrupt(digitalPinToInterrupt(pinInThrottle), pinThrottleRisingISR, RISING);
 }
 
@@ -139,7 +131,7 @@ void pinYawRisingISR() {
 }
 
 void pinYawFallingISR() {
-  rawInYawValue = micros() - rawInYawTime;
+  rawInYaw = micros() - rawInYawTime;
   attachInterrupt(digitalPinToInterrupt(pinInYaw), pinYawRisingISR, RISING);
   ISRcomplete = true;
   /* Note: ISRcomplete is set true here. One full cycle of tx inputs has been read. 
@@ -160,10 +152,10 @@ void attachAllRisingInterrupts() {
 
 //--Prints processed TX input values and motor output values.
 void printResults() {
-  Serial.print("Throttle: " + scaledInThrottleValue + '\t');
-  Serial.print("Roll: "     + scaledInRollValue + '\t');
-  Serial.print("Pitch: "    + scaledInPitchValue + '\t');
-  Serial.print("Yaw: "      + scaledInYawValue + '\t');
+  Serial.print("Throttle: " + scaledInThrottle + '\t');
+  Serial.print("Roll: "     + scaledInRoll + '\t');
+  Serial.print("Pitch: "    + scaledInPitch + '\t');
+  Serial.print("Yaw: "      + scaledInYaw + '\t');
   
   Serial.print("Motor 1: " + motorsOut[0] + '\t');
   Serial.print("Motor 2: " + motorsOut[1] + '\t');

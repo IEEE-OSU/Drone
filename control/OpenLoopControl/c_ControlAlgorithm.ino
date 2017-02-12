@@ -10,8 +10,10 @@
     OUTPUTS: 
 */
 // elsewhere declared variables
-extern unsigned int scaledInRollValue, scaledInPitchValue;
-extern unsigned int scaledInYawValue, scaledInThrottleValue;
+/*
+extern unsigned int scaledInRoll, scaledInPitch;
+extern unsigned int scaledInYaw, scaledInThrottle;
+*/
 
 // ~A5. Dead zone constant
 /* NOTES: This value +- the scaledInAvg will define the dead zone range. Inputs
@@ -63,10 +65,10 @@ const float TCut = 2 * speedWidth / kT;
 
 // ~C3.1 scaleValues
 void scaleValues() {
-  scaledInRollValue = deadZone(constrain(rawInRollValue / 4, scaledInMin, scaledInMax), deadZoneConstant);
-  scaledInPitchValue = deadZone(constrain(rawInPitchValue / 4, scaledInMin, scaledInMax), deadZoneConstant);
-  scaledInThrottleValue = constrain(rawInThrottleValue / 4, scaledInMin, scaledInMax);
-  scaledInYawValue = deadZone(constrain(rawInYawValue / 4, scaledInMin, scaledInMax), deadZoneConstant);
+  scaledInRoll = deadZone(constrain(rawInRoll / 4, scaledInMin, scaledInMax), deadZoneConstant);
+  scaledInPitch = deadZone(constrain(rawInPitch / 4, scaledInMin, scaledInMax), deadZoneConstant);
+  scaledInThrottle = constrain(rawInThrottle / 4, scaledInMin, scaledInMax);
+  scaledInYaw = deadZone(constrain(rawInYaw / 4, scaledInMin, scaledInMax), deadZoneConstant);
 }
 
 
@@ -76,11 +78,11 @@ void scaleValues() {
 */
 
 // ~C2.1 deadZone
-unsigned int deadZone(unsigned int scaledInValue, unsigned int deadZoneConstant) {
-  if (abs(scaledInValue - scaledInAvg) <= deadZoneConstant) {
-    scaledInValue = scaledInAvg;
+unsigned int deadZone(unsigned int scaledIn, unsigned int deadZoneConstant) {
+  if (abs(scaledIn - scaledInAvg) <= deadZoneConstant) {
+    scaledIn = scaledInAvg;
   }
-  return scaledInValue;
+  return scaledIn;
 }
 
 // ~C2.2 mapIntToFloat

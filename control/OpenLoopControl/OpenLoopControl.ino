@@ -9,11 +9,14 @@
     OUTPUTS: Speeds of motors 1, 2, 3, 4
 */
 
+//--Note: arduino file complication is alphabetical.
+
 // Constants
 #include <Servo.h>
 #include "PinDefinitions.h"
 
-extern unsigned int scaledInRollValue, scaledInPitchValue, scaledInThrottleValue, scaledInYawValue;
+//--variables declared elsewhere
+extern unsigned int scaledInRoll, scaledInPitch, scaledInThrottle, scaledInYaw;
 extern volatile boolean ISRcomplete;
 
 //--Setup to run once. 
@@ -27,7 +30,7 @@ void setup() {
 void loop() {
   if (ISRcomplete) {
     scaleValues();
-    controlTransfer(scaledInRollValue, scaledInPitchValue, scaledInThrottleValue, scaledInYawValue);
+    controlTransfer(scaledInRoll, scaledInPitch, scaledInThrottle, scaledInYaw);
     powerMotors();
     printResults();
     ISRcomplete = false;
