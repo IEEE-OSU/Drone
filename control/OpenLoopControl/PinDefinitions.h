@@ -1,10 +1,11 @@
 #ifndef PIN_DEF_H
   #define PIN_DEF_H
-
-  //--Note; consider using #define if memory becomes limited. - Aaron 2.7.17
-  /* NOTES: all pins selected are interrupt-enabled pins. They are selected since
-      pins 20 and 21 are reserved for the I2C communication protocol.
+ 
+  /* 
+   *  NOTES: all pins selected are interrupt-enabled pins. They are selected since
+   *  pins 20 and 21 are reserved for the I2C communication protocol.
   */
+ 
   // Arduino pins that connect to transmitter. Must be interrupt-enabled. 
   const unsigned int pinInRoll = 2;       // tx output CHANNEL 1
   const unsigned int pinInPitch = 3;      // tx output CHANNEL 2

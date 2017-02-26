@@ -1,6 +1,7 @@
 /* b_MotorControl.ino
 
     Contributors: Roger Kassouf, Iwan Martin, Chen Liang, Aaron Pycraft
+
     Date last modified: February 26, 2017
 
     Objective: sketch contains functions that convert tx signals into motor
@@ -12,6 +13,7 @@
 
 // ~A7. Output pins and Servo objects
 /* NOTES: Every motor will be given a Servo object correlated to some output pin.
+
  *  ** IMPORTANT ** Ensure that the pairs of motors (1,3) and (2,4) have these
     properties on the physical craft:
     1. That (1,3) are set to be the same directional rotation, as are (2,4)
@@ -41,6 +43,7 @@ Servo motor4;
     that an ESC will accept a servo value ranging from 20 to 180. If it is
     possible somehow to increase this, that can be changed here.
 */
+
 const unsigned int kServoMin = 20;
 const unsigned int kServoMax = 180;
 
@@ -51,6 +54,7 @@ const unsigned int kServoMax = 180;
     These variables are subject to change, as they are used incrementally
     throughout the sketch.
 */
+
 
 // setup code for motor controls
 void initMotorControl() {
@@ -69,6 +73,7 @@ void attachAllMotors() {
 }
 
 // ~C3.3 powerMotors
+
 void powerMotors(unsigned int motorsOut[4]) {
   motor1.write(motorsOut[0]);
   motor2.write(motorsOut[1]);

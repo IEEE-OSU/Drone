@@ -2,6 +2,7 @@
   
     Author: Iwan Martin
     Contributors: Roger Kassouf, Iwan Martin, Chen Liang, Aaron Pycraft
+
     Date last modified: February 26, 2017
   
     Objective: Uses arduino Interrupts to decode Tx signal.
@@ -20,6 +21,7 @@
  *  Note: maybe this doesn't matter and we can actually process asynchronously 
  *  - Aaron 2.7.17
 */
+
   volatile boolean ISRcomplete; //--denotes the end of a particular tx signal cycle. 
 
 // ~A2. Limits for pin raw inputs
@@ -29,9 +31,9 @@
  *  **IMPORTANT** See ~A4., since this value MUST be a whole number (when solved by
     hand using a calculator), the selection of the raw pin limits is what sets it!
 */
+
   const unsigned int pinInMin = 1064;
   const unsigned int pinInMax = 1872;
-
 
 // Transmitter inputs
 // ~A3. Scaled raw input limits

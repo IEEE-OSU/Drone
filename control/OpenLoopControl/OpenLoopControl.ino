@@ -1,6 +1,7 @@
 /* OpenLoopControl.ino
 
     Contributors: Roger Kassouf, Iwan Martin, Chen Liang, Aaron Pycraft
+
     Date last modified: February 26, 2017
 
     Objective: This sketch maps PPM inputs from the receiver to servo outputs for each motor.
@@ -8,6 +9,7 @@
     INPUTS: Throttle, Roll, Pitch, Yaw
     OUTPUTS: Speeds of motors 1, 2, 3, 4
 */
+
 #include <Servo.h>
 #include "PinDefinitions.h"
 #include <Wire.h>
@@ -29,6 +31,7 @@ void setup() {
 
 //--Main program loop
 void loop() {
+
   //--Get input from transmitter
   getTxInput(quadSignal);
   printTxSignals(quadSignal);
