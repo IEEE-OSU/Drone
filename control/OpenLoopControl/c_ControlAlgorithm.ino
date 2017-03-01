@@ -106,14 +106,15 @@ int mapFloatToInt(float x, float in_min, float in_max, int out_min, int out_max)
 }
 
 // ~C3 Meta-functions: functions that use other functions to accomplish a broader goal.
-/*
+
 // ~C3.2 controlTransfer
-void controlTransfer(unsigned int scaledInRoll, unsigned int scaledInPitch, unsigned int scaledInThrottle, unsigned int scaledInYaw) {
+void controlTransfer(unsigned int *motorsOut) {
+//void controlTransfer(unsigned int scaledInRoll, unsigned int scaledInPitch, unsigned int scaledInThrottle, unsigned int scaledInYaw) {
   // Step 1: Convert the scaledIn values to values on a signed/unsigned binary basis:
-  float R = mapIntToFloat(scaledInRoll, scaledInMin, scaledInMax, -1, 1);
-  float P = mapIntToFloat(scaledInPitch, scaledInMin, scaledInMax, -1, 1);
-  float U = mapIntToFloat(scaledInThrottle, scaledInMin, scaledInMax, 0, 1);
-  float Y = mapIntToFloat(scaledInYaw, scaledInMin, scaledInMax, -1, 1);
+  float R = mapIntToFloat(motorsOut[0], scaledInMin, scaledInMax, -1, 1);
+  float P = mapIntToFloat(motorsOut[1], scaledInMin, scaledInMax, -1, 1);
+  float U = mapIntToFloat(motorsOut[2], scaledInMin, scaledInMax, 0, 1);
+  float Y = mapIntToFloat(motorsOut[3], scaledInMin, scaledInMax, -1, 1);
 
   // Step 2: Perform the CTM calculations for each motor
   float N1 = 0;
@@ -143,11 +144,9 @@ void controlTransfer(unsigned int scaledInRoll, unsigned int scaledInPitch, unsi
   N3 = constrain(N3, 0, 1);
   N4 = constrain(N4, 0, 1);
   // Step 5: Re-map the speed values to each motor
-  motorsOut[0] = mapFloatToInt(N1, 0, 1, servoMin, servoMax);
-  motorsOut[1] = mapFloatToInt(N2, 0, 1, servoMin, servoMax);
-  motorsOut[2] = mapFloatToInt(N3, 0, 1, servoMin, servoMax);
-  motorsOut[3] = mapFloatToInt(N4, 0, 1, servoMin, servoMax);
+  motorsOut[0] = mapFloatToInt(N1, 0, 1, kServoMin, kServoMax);
+  motorsOut[1] = mapFloatToInt(N2, 0, 1, kServoMin, kServoMax);
+  motorsOut[2] = mapFloatToInt(N3, 0, 1, kServoMin, kServoMax);
+  motorsOut[3] = mapFloatToInt(N4, 0, 1, kServoMin, kServoMax);
 }
-
-*/
 

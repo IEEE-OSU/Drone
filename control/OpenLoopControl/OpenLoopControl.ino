@@ -17,32 +17,38 @@
 //--Global variables
   //--Used as main control signal from tx input to motor speed settings. 
   unsigned int *quadSignal; 
+  const bool runMotors = false;
                         
 
 //--Setup to run once. 
 void setup() {
-  Wire.begin();
+  //Wire.begin();
   Serial.begin(38400);
   quadSignal = new unsigned int[4];
   clearTxCycleFlag(); // true at the end of each tx signal cycle
   initTransmitterDecoding();
-  initMotorControl();
+  //initMotorControl();
+
+  Serial.println("setup complete");
+  
+  
 }
 
 //--Main program loop
 void loop() {
-
   //--Get input from transmitter
   getTxInput(quadSignal);
   printTxSignals(quadSignal);
-  //--TODO: shut down program if no signal recieved from tx (like if the tx was off)
 
   //--Perform necessary processing
   processTxSignal(quadSignal);
+  controlTransfer(quadSignal);
   
   //--Send signal to motors
-  powerMotors(quadSignal);
-  //printMotorValues(quadSignal);
+  if(runMotors) {
+    powerMotors(quadSignal);
+    printMotorValues(quadSignal);
+  }
  }
 
  void destroy() {
@@ -50,19 +56,22 @@ void loop() {
  }
 
 //--Prints processed TX input values.
-void printTxSignals(unsigned int txSignal[4]) {
-  Serial.print("Throttle: " + txSignal[2] + '\t');
-  Serial.print("Yaw: "      + txSignal[3] + '\t');
-  Serial.print("Pitch: "    + txSignal[1] + '\t');
-  Serial.print("Roll: "     + txSignal[0] + '\t');
+void printTxSignals(unsigned int *txSignal) {
+  //--Note: something messes up character encoding when trying to print different
+  //  data types at once. To print, follow following format:
+  Serial.print("Throttle: "); Serial.print(txSignal[2]); Serial.print('\t');
+  Serial.print("Yaw: ");      Serial.print(txSignal[3]); Serial.print('\t');
+  Serial.print("Pitch: ");    Serial.print(txSignal[1]); Serial.print('\t');
+  Serial.print("Roll: ");     Serial.print(txSignal[0]); Serial.print('\t');
+  Serial.println();
 }
 
-
 //--Prints motor output values.
-void printMotorValues(unsigned int motorsOut[4]) { 
-  Serial.print("Motor 1: " + motorsOut[0] + '\t');
-  Serial.print("Motor 2: " + motorsOut[1] + '\t');
-  Serial.print("Motor 3: " + motorsOut[2] + '\t');
-  Serial.print("Motor 4: " + motorsOut[3] + '\n');
+void printMotorValues(unsigned int *motorsOut) { 
+  Serial.print("Motor 1: "); Serial.print(motorsOut[0]); Serial.print('\t');
+  Serial.print("Motor 2: "); Serial.print(motorsOut[1]); Serial.print('\t');
+  Serial.print("Motor 3: "); Serial.print(motorsOut[2]); Serial.print('\t');
+  Serial.print("Motor 4: "); Serial.print(motorsOut[3]); Serial.print('\t');
+  Serial.println();
 }
 

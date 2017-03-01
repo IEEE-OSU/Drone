@@ -74,7 +74,7 @@ void attachAllMotors() {
 
 // ~C3.3 powerMotors
 
-void powerMotors(unsigned int motorsOut[4]) {
+void powerMotors(unsigned int *motorsOut) {
   motor1.write(motorsOut[0]);
   motor2.write(motorsOut[1]);
   motor3.write(motorsOut[2]);

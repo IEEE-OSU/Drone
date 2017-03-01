@@ -95,7 +95,7 @@ boolean isTxSignalCycleComplete() {
 }
 
 //--Reads 1 cycle of Tx signals into array
-void getTxInput(unsigned int txSignal[4]) {
+void getTxInput(unsigned int *txSignal) {
   if(ISRcomplete) {
     //txSignal[4] = Roll, pitch , throttle, yaw  
     txSignal[0] = scaledInRoll;
