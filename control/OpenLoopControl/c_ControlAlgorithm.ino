@@ -12,9 +12,7 @@
     OUTPUTS: motor output values [motor1, motor2, motor3, motor4]
 */
 
-// ~A5. Dead zone constant: this  +- scaledInAvg defines dead 
-//  zone range. Inputs in this range will revert back to scaledInAvg.
-const unsigned int kDeadZone = 3;
+
 
 // ~A6. Control constants
 /* NOTES: Each constant corresponds to different values inside of the control
@@ -57,32 +55,6 @@ const float TCut = 2 * speedWidth / kT;
     All of the functions outside of setup and loop that make the sketch function!
 */
 
-
-/*
- * Performs any necessary processing on the tx inputs before sending the
- * signal to the motors
- */
-void processTxSignal(unsigned int txSignal[4]) {
-    //txSignal[4] = Roll, pitch , throttle, yaw  
-    txSignal[0] = deadZone(constrain(rawInRoll / 4, scaledInMin, scaledInMax));  
-    txSignal[1] = deadZone(constrain(rawInPitch / 4, scaledInMin, scaledInMax));
-    txSignal[2] = constrain(rawInThrottle / 4, scaledInMin, scaledInMax);
-    txSignal[3] = deadZone(constrain(rawInYaw / 4, scaledInMin, scaledInMax));
-}
-
-// ~C2. Scaling and Mapping Functions
-/* NOTES: The purpose of these functions is to assist in computing the scaled
-    input values, after the raw input values have been read.
-*/
-
-// ~C2.1 deadZone
-unsigned int deadZone(unsigned int scaledIn) {
-  if (abs(scaledIn - scaledInAvg) <= kDeadZone) {
-    scaledIn = scaledInAvg;
-  }
-  return scaledIn;
-}
-
 // ~C2.2 mapIntToFloat
 float mapIntToFloat(int x, int in_min, int in_max, float out_min, float out_max)
 {
@@ -108,8 +80,8 @@ int mapFloatToInt(float x, float in_min, float in_max, int out_min, int out_max)
 // ~C3 Meta-functions: functions that use other functions to accomplish a broader goal.
 
 // ~C3.2 controlTransfer
-void controlTransfer(unsigned int *motorsOut) {
-//void controlTransfer(unsigned int scaledInRoll, unsigned int scaledInPitch, unsigned int scaledInThrottle, unsigned int scaledInYaw) {
+void controlTransfer(unsigned int *txSignal, unsigned int *motorsOut) {
+/*
   // Step 1: Convert the scaledIn values to values on a signed/unsigned binary basis:
   float R = mapIntToFloat(motorsOut[0], scaledInMin, scaledInMax, -1, 1);
   float P = mapIntToFloat(motorsOut[1], scaledInMin, scaledInMax, -1, 1);
@@ -148,5 +120,6 @@ void controlTransfer(unsigned int *motorsOut) {
   motorsOut[1] = mapFloatToInt(N2, 0, 1, kServoMin, kServoMax);
   motorsOut[2] = mapFloatToInt(N3, 0, 1, kServoMin, kServoMax);
   motorsOut[3] = mapFloatToInt(N4, 0, 1, kServoMin, kServoMax);
+  */
 }
 

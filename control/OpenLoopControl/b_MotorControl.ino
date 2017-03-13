@@ -72,6 +72,13 @@ void attachAllMotors() {
   motor4.attach(motor4pin);
 }
 
+void disconnectAllMotors() {
+  motor1.detach();
+  motor2.detach();
+  motor3.detach();
+  motor4.detach();
+}
+
 // ~C3.3 powerMotors
 
 void powerMotors(unsigned int *motorsOut) {

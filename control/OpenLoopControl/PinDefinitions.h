@@ -2,8 +2,8 @@
   #define PIN_DEF_H
  
   /* 
-   *  NOTES: all pins selected are interrupt-enabled pins. They are selected since
-   *  pins 20 and 21 are reserved for the I2C communication protocol.
+   *  NOTES: all pins selected are interrupt-enabled pins. They are selected 
+   *  since pins 20 and 21 are reserved for the I2C communication protocol.
   */
  
   // Arduino pins that connect to transmitter. Must be interrupt-enabled. 

@@ -5,8 +5,9 @@
  */
 
 /*
- SDA and SCL should have external pull-up resistors (to 3.3V).
- 10k resistors are on the EMSENSR-9250 breakout board.
+  IMPORTANT:
+  SDA and SCL should have external pull-up resistors (to 3.3V).
+  10k resistors are on the EMSENSR-9250 breakout board.
  
  Hardware setup:
  MPU9250 Breakout --------- Arduino
@@ -16,7 +17,6 @@
  GND ----------------------- GND
 */
 /**
-#include <Wire.h>
 
 int imuReading= 0;
 #define MPU9250_ADDRESS 0x68
@@ -25,3 +25,4 @@ int imuReading= 0;
 
 const uint8_t accelZ = 0x3F; //high byte
 */
+
