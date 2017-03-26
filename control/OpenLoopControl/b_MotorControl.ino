@@ -11,23 +11,45 @@
     OUTPUTS: motor output values [motor1, motor2, motor3, motor4]
 */
 
-// ~A7. Output pins and Servo objects
-/* NOTES: Every motor will be given a Servo object correlated to some output pin.
-
- *  ** IMPORTANT ** Ensure that the pairs of motors (1,3) and (2,4) have these
+/*  Motor configuration information
+ *  Ensure that the pairs of motors (1,3) and (2,4) have these
     properties on the physical craft:
     1. That (1,3) are set to be the same directional rotation, as are (2,4)
-    2. That the pairs (1,3) and (2,4) rotate in different directions
+    2. That the pairs (1,3) and (2,4) rotate in different directions (CW vs CCW)
     3. That the motors (1,3) are set across from each other on the drone's cross,
        as are (2,4).
-    (The established positive direction for the motors is counter-clockwise, and
-    originally set for 1 and 3).
+       (The established positive direction for the motors is counter-clockwise, and
+       originally set for 1 and 3).
+    4. The quad shape is an X, with motors setup as follows:
+            
+             FRONT                
+               M1
+               |
+               |                              |
+       M2------+------M4
+               |
+               |
+               M3               
+       
+      
+         M1         M4    
+           \       /      M1 is "upper left corner of X"
+             \   /        M2 is below M1
+               X          M3 is right of M2
+             /   \        M4 is above M3 and left of M1
+           /       \
+         M2         M3 
+       
+    5. Roll  is rotation about M1-M3 axis line
+          (+) is when M2 is raised
+       pitch is rotation about M2-M4 axis line
+          (+) is when M1 is raised
+       yaw is rotation about the plane that contains all 4 motors
 */
 Servo motor1;
 Servo motor2;
 Servo motor3;
 Servo motor4;
-
 
 // output pins must be PWM enabled pins.
 #ifndef MOTOR_PINS

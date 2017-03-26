@@ -23,6 +23,12 @@
   unsigned int *motorSpeeds; // used as input to motor control
   const bool ENABLE_MOTORS = false;
   bool TxSignalError = false; //true if error exists in Tx
+
+  // Definitions of indexes in txSignal. ki for "const index"
+  const int THROTTLE = 2; 
+  const int PITCH    = 0;
+  const int ROLL     = 1;
+  const int YAW      = 3;
                         
 //--Setup to run once. 
 void setup() {
@@ -33,6 +39,7 @@ void setup() {
   initTransmitterDecoding();
   
   //--Setup IMU & altimeter sensors
+  //--TODO: make this work (closed loop)
   //Wire.begin();
 
   quadSignal = new unsigned int[4];
@@ -75,10 +82,10 @@ void destroy() {
 void printTxSignals(unsigned int *txSignal) {
   //--Note: something messes up character encoding when trying to print 
   //  different data types at once. To print, follow following format:
-  Serial.print("Throttle: "); Serial.print(txSignal[2]); Serial.print("\t");
-  Serial.print("Roll: \t");   Serial.print(txSignal[0]); Serial.print("\t");
-  Serial.print("Pitch: ");    Serial.print(txSignal[1]); Serial.print("\t");
-  Serial.print("Yaw: \t");    Serial.print(txSignal[3]); Serial.print("\t");
+  Serial.print("Throttle: "); Serial.print(txSignal[THROTTLE]); Serial.print("\t");
+  Serial.print("Roll: \t");   Serial.print(txSignal[ROLL]);     Serial.print("\t");
+  Serial.print("Pitch: ");    Serial.print(txSignal[PITCH]);    Serial.print("\t");
+  Serial.print("Yaw: \t");    Serial.print(txSignal[YAW]);      Serial.print("\t");
   Serial.println();
 }
 
