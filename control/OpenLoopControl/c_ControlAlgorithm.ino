@@ -1,16 +1,15 @@
-/* a_DecodeTransmitterInput.ino
+/* c_ControlAlgorithm.ino
 
     Author: Aaron Pycraft, Roger Kassouf
     Contributors: Roger Kassouf, Iwan Martin, Chen Liang, Aaron Pycraft
 
-    Date last modified: February 26, 2017
+    Date last modified: 
 
     Objective: sketch contains functions that convert tx signals into motor
                control signals. 
 
     INPUTS: tx signals: [Roll, pitch, throttle, yaw]
     OUTPUTS: motor output values [motor1, motor2, motor3, motor4]
-
     Notes: controlTransfer function below follows closely from the doc
           "Design of a discrete open loop control algorithm.docx"
           
@@ -95,5 +94,6 @@ void controlTransfer(const unsigned int *txSignal, unsigned int *motorsOut) {
   motorsOut[1] = M2;
   motorsOut[2] = M3;
   motorsOut[3] = M4;
+
 }
 
