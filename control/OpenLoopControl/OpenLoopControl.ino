@@ -67,6 +67,7 @@ void loop() {
 //  printMotorValues(motorSpeeds);
    
   //--Send signal to motors, if no errors exist && they're enabled
+  //--TODO; check that this logical check is working correctly
   if(!TxSignalError && ENABLE_MOTORS) {
     powerMotors(quadSignal);
   }

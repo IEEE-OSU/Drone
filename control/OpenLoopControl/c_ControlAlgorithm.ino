@@ -23,13 +23,6 @@
 const int kState3resolution = kState1Max - kState1Min;
 const int kState3Midpoint = kState1Max/2;
 
-//--Motor index values
-const int kiM1 = 0;
-const int kiM2 = 1;
-const int kiM3 = 2;
-const int kiM4 = 3;
-
-
 //--Motor transformation constants
 const unsigned int kThrottleBound = (kState0Max - kState0Min)/4;
 const unsigned int kRotationsBound = (kThrottleBound/2)-1;
@@ -50,6 +43,13 @@ const int TCut = (kThrottleBound*(kNI+kNY)/Ndiff) + 1;
  *  OUTPUT: motorsOut = [M1 M2 M3 M4]
  */
 void controlTransfer(const unsigned int *txSignal, unsigned int *motorsOut) {
+  //--FOr debugging, simply make all motors behave the same way
+  motorsOut[0] = map(txSignal[THROTTLE], kState1Min, kState1Max, kServoMin, kServoMax);
+  motorsOut[1] = map(txSignal[THROTTLE], kState1Min, kState1Max, kServoMin, kServoMax);
+  motorsOut[2] = map(txSignal[THROTTLE], kState1Min, kState1Max, kServoMin, kServoMax);
+  motorsOut[3] = map(txSignal[THROTTLE], kState1Min, kState1Max, kServoMin, kServoMax);
+  /*
+  
   // abandon array in favor of more readable operations on the signals
   // the output will be contained in motorsOut anyways
   // probably a bad idea to read/write the same place VERY FAST
@@ -94,6 +94,7 @@ void controlTransfer(const unsigned int *txSignal, unsigned int *motorsOut) {
   motorsOut[1] = M2;
   motorsOut[2] = M3;
   motorsOut[3] = M4;
+  */
 
 }
 
