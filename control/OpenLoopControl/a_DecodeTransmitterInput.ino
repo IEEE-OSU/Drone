@@ -45,19 +45,19 @@
   void(* resetFunc) (void) = 0; //declare reset function @ address 0
 */
   //--Observed limits of the raw tx input signals. Same for each channel.
-  const unsigned int kState0Min = 1036; // min value for state 1
-  const unsigned int kState0Max = 1872; // max value for state 1
+  const unsigned int pinInMin = 1036;
+  const unsigned int pinInMax = 1872;
   //--Desired limits of tx signal (mapped from raw)
-  const unsigned int kState1Min = kState0Min / 4; // 266 // min for state 2
-  const unsigned int kState1Max = kState0Max / 4; // 468 // max for state 2 
+  const unsigned int scaledInMin = pinInMin / 4; // 266
+  const unsigned int scaledInMax = pinInMax / 4; // 468
 
 // ~A4. Scaled raw input average
 //--defines the average "midpoint" between the two scaled input limits.
 //  used to center Roll, Pitch and Yaw at 0 eventually.
-  const unsigned int scaledInAvg = (kState1Max + kState1Min) / 2;
+  const unsigned int scaledInAvg = (scaledInMax + scaledInMin) / 2;
 
 //--The raw input states from the Interrupt Service Routine (ISR)
-//  functions. They will eventually be constrained by [kState0Min, kState0Max].
+//  functions. They will eventually be constrained by [pinInMin, pinInMax].
   volatile unsigned int rawInThrottle = 0;
   volatile unsigned int rawInYaw    = 0;
   volatile unsigned int rawInPitch  = 0;
@@ -144,25 +144,27 @@ void checkForSignalLoss() {
 }
 
 /*
- * Map the raw tx signal into the desired range; transitions values
- * into "state 2"
- * Ranges: 
- *  inputs:  kState0Min      to   kState0Max
- *  outputs: kState1Max  to   kState1Min
+ * Map the raw tx signal into the desired range 
  */
 void processTxSignal(unsigned int *txSignal) {
     //txSignal[4] = Roll, pitch , throttle, yaw  
-    txSignal[0] = deadZone(constrain(rawInRoll / 4, kState1Min, kState1Max));  
-    txSignal[1] = deadZone(constrain(rawInPitch/4,  kState1Min, kState1Max));
-    txSignal[2] = constrain(rawInThrottle/4,        kState1Min, kState1Max);
-    txSignal[3] = deadZone(constrain(rawInYaw / 4,  kState1Min, kState1Max));
+    txSignal[0] = deadZone(constrain(rawInRoll / 4, scaledInMin, scaledInMax));  
+    txSignal[1] = deadZone(constrain(rawInPitch/4,  scaledInMin, scaledInMax));
+    txSignal[2] = constrain(rawInThrottle/4,        scaledInMin, scaledInMax);
+    txSignal[3] = deadZone(constrain(rawInYaw / 4,  scaledInMin, scaledInMax));
 }
 
 // ~C2.1 deadZone
 unsigned int deadZone(unsigned int scaledIn) {
   return (abs(scaledIn - scaledInAvg) <= kDeadZone) ? scaledInAvg: scaledIn;
-}  
-
+  /*
+  if (abs(scaledIn - scaledInAvg) <= kDeadZone) {
+    scaledIn = scaledInAvg;
+  }
+  return scaledIn;
+  */
+  
+}
 
 // ~C1. Interrupt Functions
 /* Functions run asynchronously at rising/falling edges of each tx channel. 
