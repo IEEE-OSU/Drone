@@ -1,6 +1,6 @@
 /* a_DecodeTransmitterInput.ino
 
-    Author: Roger Kassouf
+    Author: Aaron Pycraft, Roger Kassouf
     Contributors: Roger Kassouf, Iwan Martin, Chen Liang, Aaron Pycraft
 
     Date last modified: February 26, 2017
@@ -10,116 +10,90 @@
 
     INPUTS: tx signals: [Roll, pitch, throttle, yaw]
     OUTPUTS: motor output values [motor1, motor2, motor3, motor4]
+
+    Notes: controlTransfer function below follows closely from the doc
+          "Design of a discrete open loop control algorithm.docx"
+          
+          The control algorithm is written as a series of operations on 
+          variables as they transistion from state 0 (raw tx time signals)
+          to the final state
 */
 
+//--Constants used throughout algorithm
+// kState1Min, kState1Max; need not be declared b/c of forced compilation order
+const int kState3resolution = kState1Max - kState1Min;
+const int kState3Midpoint = kState1Max/2;
+
+//--Motor index values
+const int kiM1 = 0;
+const int kiM2 = 1;
+const int kiM3 = 2;
+const int kiM4 = 3;
 
 
-// ~A6. Control constants
-/* NOTES: Each constant corresponds to different values inside of the control
-    transfer matrix (CTM). Scroll through to see their implementation.
+//--Motor transformation constants
+const unsigned int kThrottleBound = (kState0Max - kState0Min)/4;
+const unsigned int kRotationsBound = (kThrottleBound/2)-1;
+const int kNI = 25;
+const int kNY = 5;
+const int kI = kRotationsBound/(2*kNI);
+const int kY = kRotationsBound/(4*kNY);
+const int Ndiff = (kServoMax-kServoMin)-kNI-kNY;
+const int TCut = (kThrottleBound*(kNI+kNY)/Ndiff) + 1;
 
-    Descriptions:
+//--Variables used in controlTransfer
+  int T, R, P, Y;   // local copies of the 4 tx signals
+  int M1, M2, M3, M4; // temp variables for motor speeds
+  int NT, NP, NR, NY; // transformation factors
 
-    ** PARAMETERS TO SELECT **
-    speedWidth -- the absolute maximium difference in speed between two motors.
-      It must be between 0 and 1, so something like 0.20.
-    tiltYaw -- the ratio of speeds between tilting (roll and/or pitch) and the
-      yaw. Reasonably, you would want this greater than 1, but for sure greater
-      than 0. There is no true upper limit.
+/* Inputs are txSignal, which enter this function in state 2 
+ *  INPUT:  txSignal  = [R2 P2 Y2 T2], 2 denotes state 2 of values
+ *  OUTPUT: motorsOut = [M1 M2 M3 M4]
+ */
+void controlTransfer(const unsigned int *txSignal, unsigned int *motorsOut) {
+  // abandon array in favor of more readable operations on the signals
+  // the output will be contained in motorsOut anyways
+  // probably a bad idea to read/write the same place VERY FAST
+  T = txSignal[THROTTLE];
+  R = txSignal[ROLL];
+  P = txSignal[PITCH];
+  Y = txSignal[YAW];
 
-    ** PARAMETERS CALCULATED **
-    kT -- Apportions part of the Throttle command to the motors.
-    kI -- Apportions part of the Roll and Pitch commands to the motors.
-    kY -- Apportions part of the Yaw command to the motors.
-    Tcut -- The throttle speed at which the control transfer will switch on the
-      rotational control. When T is less than Tcut, all motors will have the same
-      speed.
+  M1 = kServoMin;
+  M2 = kServoMin;
+  M3 = kServoMin;
+  M4 = kServoMin;
+  
+  // Transform to state 4 (skip 3); map values from 0 to state 3 resolution
+  // to get lower bound of txSignal to be 0 to $STATE3_MAX_VALUE
+  T = T - kState1Min;
+  R = R - kState1Min - kState3Midpoint;
+  P = P - kState1Min - kState3Midpoint;
+  Y = Y - kState1Min - kState3Midpoint;
+  // state 4 achieved
 
-    For a better description of each parameter, look in the controlTransfer function
-*/
-const float speedWidth = 0.2;
-const float tiltYaw = 2;
-const float kY = speedWidth / (1 + (tiltYaw / 2));
-const float kI = (tiltYaw / 2) * kY;
-const float kT = 4 - (2 * kI) - kY;
-const float TCut = 2 * speedWidth / kT;
-
-//const float Nmax = sqrt((1 / (4 * kT)) + (1 / (2 * kI*kT)) + (1 / (4 * kY)));
-//const float Nmaxsquared = (1 / (4 * kT)) + (1 / (2 * kI*kT)) + (1 / (4 * kY));
-
-
-/*
-    ===============================================================================
-    ~C. FUNCTIONS
-    ===============================================================================
-    All of the functions outside of setup and loop that make the sketch function!
-*/
-
-// ~C2.2 mapIntToFloat
-float mapIntToFloat(int x, int in_min, int in_max, float out_min, float out_max)
-{
-  // Cast the input limit integers to floats
-  x = (float) x; in_min = (float) in_min; in_max = (float) in_max;
-  // Perform the map, return the float
-  return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
-}
-
-// ~C2.3 mapFloatToInt
-int mapFloatToInt(float x, float in_min, float in_max, int out_min, int out_max)
-{
-  // We will perform the math in floats first. Cast output limit integers to floats.
-  out_min = (float) out_min; out_max = (float) out_max;
-  // Perform the map (using floats!)
-  float x_out = (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
-  // Cast the output variable as an integer. While this does perform an inherent
-  // "rounding down" it should be reasonably close to the desired value.
-  x_out = (int) x_out;
-  return x_out;
-}
-
-// ~C3 Meta-functions: functions that use other functions to accomplish a broader goal.
-
-// ~C3.2 controlTransfer
-void controlTransfer(unsigned int *txSignal, unsigned int *motorsOut) {
-/*
-  // Step 1: Convert the scaledIn values to values on a signed/unsigned binary basis:
-  float R = mapIntToFloat(motorsOut[0], scaledInMin, scaledInMax, -1, 1);
-  float P = mapIntToFloat(motorsOut[1], scaledInMin, scaledInMax, -1, 1);
-  float U = mapIntToFloat(motorsOut[2], scaledInMin, scaledInMax, 0, 1);
-  float Y = mapIntToFloat(motorsOut[3], scaledInMin, scaledInMax, -1, 1);
-
-  // Step 2: Perform the CTM calculations for each motor
-  float N1 = 0;
-  float N2 = 0;
-  float N3 = 0;
-  float N4 = 0;
-  float NT = (kT * U / 4);
-  float NR = (kI * R / 2);
-  float NP = (kT * P / 2);
-  float NY = (kY * Y / 4);
-  if (U <= TCut) {
-    N1 = NT;
-    N2 = NT;
-    N3 = NT;
-    N4 = NT;
+  NT = Ndiff*T/kThrottleBound;
+  NP = P/kI;
+  NR = R/kI;
+  NY = Y/kY;
+  
+  if (T < TCut) {
+    M1 = NT + kServoMin;
+    M2 = NT + kServoMin;
+    M3 = NT + kServoMin;
+    M4 = NT + kServoMin;
   }
   else {
-    N1 = NT + NR + NY;
-    N2 = NT + NP - NY;
-    N3 = NT - NR + NY;
-    N4 = NT - NP - NY;
+    M1 = NT + NP + NY + kServoMin;
+    M2 = NT + NR - NY + kServoMin;
+    M3 = NT - NP + NY + kServoMin;
+    M4 = NT - NR - NY + kServoMin;
   }
 
-  // Step 3: Constrain the squared speeds to [0, (Nmax)^2]
-  N1 = constrain(N1, 0, 1);
-  N2 = constrain(N2, 0, 1);
-  N3 = constrain(N3, 0, 1);
-  N4 = constrain(N4, 0, 1);
   // Step 5: Re-map the speed values to each motor
-  motorsOut[0] = mapFloatToInt(N1, 0, 1, kServoMin, kServoMax);
-  motorsOut[1] = mapFloatToInt(N2, 0, 1, kServoMin, kServoMax);
-  motorsOut[2] = mapFloatToInt(N3, 0, 1, kServoMin, kServoMax);
-  motorsOut[3] = mapFloatToInt(N4, 0, 1, kServoMin, kServoMax);
-  */
+  motorsOut[0] = M1;
+  motorsOut[1] = M2;
+  motorsOut[2] = M3;
+  motorsOut[3] = M4;
 }
 
