@@ -28,8 +28,8 @@ const unsigned int kThrottleBound = (kState0Max - kState0Min)/4;
 const unsigned int kRotationsBound = (kThrottleBound/2)-1;
 const int kNI = 25;
 const int kNY = 5;
-const int kI = kRotationsBound/(2*kNI);
-const int kY = kRotationsBound/(4*kNY);
+const int kI = kRotationsBound/(kNI);
+const int kY = kRotationsBound/(kNY);
 const int Ndiff = (kServoMax-kServoMin)-kNI-kNY;
 const int TCut = (kThrottleBound*(kNI+kNY)/Ndiff) + 1;
 
