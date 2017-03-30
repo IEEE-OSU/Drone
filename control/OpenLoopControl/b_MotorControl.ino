@@ -46,18 +46,18 @@
           (+) is when M1 is raised
        yaw is rotation about the plane that contains all 4 motors
 */
-Servo motor1;
-Servo motor2;
-Servo motor3;
-Servo motor4;
+Servo ESC1;//motor1;
+Servo ESC2;//motor2;
+Servo ESC3;//motor3;
+Servo ESC4;//motor4;
 
 // output pins must be PWM enabled pins.
 #ifndef MOTOR_PINS
   #define MOTOR_PINS
-  const unsigned int motor1pin = 5;
-  const unsigned int motor2pin = 6;
-  const unsigned int motor3pin = 7;
-  const unsigned int motor4pin = 8;
+  const unsigned int ESC1pin = 5;
+  const unsigned int ESC2pin = 6;
+  const unsigned int ESC3pin = 7;
+  const unsigned int ESC4pin = 8;
 #endif
 
 // ~A8. Servo limits
@@ -81,32 +81,32 @@ const unsigned int kServoMax = 180;
 // setup code for motor controls
 void initMotorControl() {
   attachAllMotors();
-  motor1.write(kServoMin);
-  motor2.write(kServoMin);
-  motor3.write(kServoMin);
-  motor4.write(kServoMin);
+  ESC1.write(kServoMin);
+  ESC2.write(kServoMin);
+  ESC3.write(kServoMin);
+  ESC4.write(kServoMin);
 }
 
 void attachAllMotors() {
-  motor1.attach(motor1pin);
-  motor2.attach(motor2pin);
-  motor3.attach(motor3pin);
-  motor4.attach(motor4pin);
+  ESC1.attach(motor1pin);
+  ESC2.attach(motor2pin);
+  ESC3.attach(motor3pin);
+  ESC4.attach(motor4pin);
 }
 
 void disconnectAllMotors() {
-  motor1.detach();
-  motor2.detach();
-  motor3.detach();
-  motor4.detach();
+  ESC1.detach();
+  ESC2.detach();
+  ESC3.detach();
+  ESC4.detach();
 }
 
 // ~C3.3 powerMotors
 
 void powerMotors(unsigned int *motorsOut) {
-  motor1.write(motorsOut[0]);
-  motor2.write(motorsOut[1]);
-  motor3.write(motorsOut[2]);
-  motor4.write(motorsOut[3]);
+  ESC1.write(motorsOut[0]);
+  ESC2.write(motorsOut[1]);
+  ESC3.write(motorsOut[2]);
+  ESC4.write(motorsOut[3]);
 }
 
