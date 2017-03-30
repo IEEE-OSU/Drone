@@ -65,9 +65,11 @@ Servo ESC4;//motor4;
     that an ESC will accept a servo value ranging from 20 to 180. If it is
     possible somehow to increase this, that can be changed here.
 */
-
-const unsigned int kServoMin = 20;
-const unsigned int kServoMax = 180;
+// Note: continous servos can be written values between 1000 and 2000
+//  where 1000 = fully CCW; (NEEDS TO BE EXPERIMENTALLY VERIFIED)
+//  and   2000 = fully CW (speeds) (usually is the max speed)
+const unsigned int kServoMin = 500;//20;
+const unsigned int kServoMax = 2000;//180;
 
 /*
     ===============================================================================
@@ -81,10 +83,10 @@ const unsigned int kServoMax = 180;
 // setup code for motor controls
 void initMotorControl() {
   attachAllMotors();
-  ESC1.write(kServoMin);
-  ESC2.write(kServoMin);
-  ESC3.write(kServoMin);
-  ESC4.write(kServoMin);
+  ESC1.writeMicroseconds(kServoMin);
+  ESC2.writeMicroseconds(kServoMin);
+  ESC3.writeMicroseconds(kServoMin);
+  ESC4.writeMicroseconds(kServoMin);
 }
 
 void attachAllMotors() {
@@ -104,9 +106,9 @@ void disconnectAllMotors() {
 // ~C3.3 powerMotors
 
 void powerMotors(unsigned int *motorsOut) {
-  ESC1.write(motorsOut[0]);
-  ESC2.write(motorsOut[1]);
-  ESC3.write(motorsOut[2]);
-  ESC4.write(motorsOut[3]);
+  ESC1.writeMicroseconds(motorsOut[0]);
+  ESC2.writeMicroseconds(motorsOut[1]);
+  ESC3.writeMicroseconds(motorsOut[2]);
+  ESC4.writeMicroseconds(motorsOut[3]);
 }
 
