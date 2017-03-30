@@ -15,10 +15,10 @@
   // Arduino pins that connect to ESC servo data inputs (white wire)
   #ifndef MOTOR_PINS
     #define MOTOR_PINS
-    const unsigned int motor1pin = 5;
-    const unsigned int motor2pin = 6;
-    const unsigned int motor3pin = 7;
-    const unsigned int motor4pin = 8;
+    const unsigned int ESC1pin = 5;
+    const unsigned int ESC2pin = 6;
+    const unsigned int ESC3pin = 7;
+    const unsigned int ESC4pin = 8;
   #endif
  
 #endif
