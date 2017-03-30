@@ -103,8 +103,8 @@ void initTxWatchdog() {
   Serial.println("Setting up Tx watchdog...");  
   checkForTxSignal = true;
   //--Setup interrupt to check for valid Tx signal every once-in-a-while
-  Timer5.initialize(kTxSignalPeriod);
-  Timer5.attachInterrupt(TxSignalCheckISR, kTxSignalPeriod);
+  txWDT.initialize(kTxSignalPeriod);
+  txWDT.attachInterrupt(TxSignalCheckISR, kTxSignalPeriod);
 }
 
 //--Mutator function to broaden scope of ISRcomplete;
