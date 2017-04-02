@@ -46,28 +46,34 @@
           (+) is when M1 is raised
        yaw is rotation about the plane that contains all 4 motors
 */
-Servo motor1;
-Servo motor2;
-Servo motor3;
-Servo motor4;
+Servo ESC1;//motor1;
+Servo ESC2;//motor2;
+Servo ESC3;//motor3;
+Servo ESC4;//motor4;
 
 // output pins must be PWM enabled pins.
+/*
 #ifndef MOTOR_PINS
   #define MOTOR_PINS
-  const unsigned int motor1pin = 5;
-  const unsigned int motor2pin = 6;
-  const unsigned int motor3pin = 7;
-  const unsigned int motor4pin = 8;
+  const unsigned int ESC1pin = 5;
+  const unsigned int ESC2pin = 6;
+  const unsigned int ESC3pin = 7;
+  const unsigned int ESC4pin = 8;
 #endif
+*/
 
 // ~A8. Servo limits
 /* NOTES: When calibrating the electronic speed controllers (ESCs), it was found
     that an ESC will accept a servo value ranging from 20 to 180. If it is
     possible somehow to increase this, that can be changed here.
 */
-
-const unsigned int kServoMin = 20;
-const unsigned int kServoMax = 180;
+// Note: continous servos can be written values between 1000 and 2000
+//  where 1000 = fully CCW; (NEEDS TO BE EXPERIMENTALLY VERIFIED)
+//  and   2000 = fully CW (speeds) (usually is the max speed)
+const unsigned int kServoMin = 1200;//20;
+const unsigned int kServoMax = 1500;//180;
+//const unsigned int kServoMin = 20;//20;
+//const unsigned int kServoMax = 180;//180;
 
 /*
     ===============================================================================
@@ -81,32 +87,39 @@ const unsigned int kServoMax = 180;
 // setup code for motor controls
 void initMotorControl() {
   attachAllMotors();
-  motor1.write(kServoMin);
-  motor2.write(kServoMin);
-  motor3.write(kServoMin);
-  motor4.write(kServoMin);
+  ESC1.writeMicroseconds(kServoMin);
+  ESC2.writeMicroseconds(kServoMin);
+  ESC3.writeMicroseconds(kServoMin);
+  ESC4.writeMicroseconds(kServoMin);
 }
 
 void attachAllMotors() {
-  motor1.attach(motor1pin);
-  motor2.attach(motor2pin);
-  motor3.attach(motor3pin);
-  motor4.attach(motor4pin);
+  ESC1.attach(ESC1pin, kServoMin, kServoMax);
+  ESC2.attach(ESC2pin, kServoMin, kServoMax);
+  ESC3.attach(ESC3pin, kServoMin, kServoMax);
+  ESC4.attach(ESC4pin, kServoMin, kServoMax);
 }
 
 void disconnectAllMotors() {
-  motor1.detach();
-  motor2.detach();
-  motor3.detach();
-  motor4.detach();
+  ESC1.detach();
+  ESC2.detach();
+  ESC3.detach();
+  ESC4.detach();
 }
 
 // ~C3.3 powerMotors
 
 void powerMotors(unsigned int *motorsOut) {
-  motor1.write(motorsOut[0]);
-  motor2.write(motorsOut[1]);
-  motor3.write(motorsOut[2]);
-  motor4.write(motorsOut[3]);
+  ESC1.writeMicroseconds(motorsOut[0]);
+  ESC2.writeMicroseconds(motorsOut[1]);
+  ESC3.writeMicroseconds(motorsOut[2]);
+  ESC4.writeMicroseconds(motorsOut[3]);
+}
+
+void setMotorsToMin() {
+  ESC1.writeMicroseconds(kServoMin);
+  ESC2.writeMicroseconds(kServoMin);
+  ESC3.writeMicroseconds(kServoMin);
+  ESC4.writeMicroseconds(kServoMin);
 }
 

@@ -1,16 +1,15 @@
-/* a_DecodeTransmitterInput.ino
+/* c_ControlAlgorithm.ino
 
     Author: Aaron Pycraft, Roger Kassouf
     Contributors: Roger Kassouf, Iwan Martin, Chen Liang, Aaron Pycraft
 
-    Date last modified: February 26, 2017
+    Date last modified: 
 
     Objective: sketch contains functions that convert tx signals into motor
                control signals. 
 
     INPUTS: tx signals: [Roll, pitch, throttle, yaw]
     OUTPUTS: motor output values [motor1, motor2, motor3, motor4]
-
     Notes: controlTransfer function below follows closely from the doc
           "Design of a discrete open loop control algorithm.docx"
           
@@ -24,20 +23,13 @@
 const int kState3resolution = kState1Max - kState1Min;
 const int kState3Midpoint = kState1Max/2;
 
-//--Motor index values
-const int kiM1 = 0;
-const int kiM2 = 1;
-const int kiM3 = 2;
-const int kiM4 = 3;
-
-
 //--Motor transformation constants
 const unsigned int kThrottleBound = (kState0Max - kState0Min)/4;
 const unsigned int kRotationsBound = (kThrottleBound/2)-1;
 const int kNI = 25;
 const int kNY = 5;
-const int kI = kRotationsBound/(2*kNI);
-const int kY = kRotationsBound/(4*kNY);
+const int kI = kRotationsBound/(kNI);
+const int kY = kRotationsBound/(kNY);
 const int Ndiff = (kServoMax-kServoMin)-kNI-kNY;
 const int TCut = (kThrottleBound*(kNI+kNY)/Ndiff) + 1;
 
@@ -51,6 +43,13 @@ const int TCut = (kThrottleBound*(kNI+kNY)/Ndiff) + 1;
  *  OUTPUT: motorsOut = [M1 M2 M3 M4]
  */
 void controlTransfer(const unsigned int *txSignal, unsigned int *motorsOut) {
+  //--For debugging, simply make all motors behave the same way
+  motorsOut[0] = map(txSignal[THROTTLE], kState1Min, kState1Max, kServoMin, kServoMax);
+  motorsOut[1] = map(txSignal[THROTTLE], kState1Min, kState1Max, kServoMin, kServoMax);
+  motorsOut[2] = map(txSignal[THROTTLE], kState1Min, kState1Max, kServoMin, kServoMax);
+  motorsOut[3] = map(txSignal[THROTTLE], kState1Min, kState1Max, kServoMin, kServoMax);
+  /*
+  
   // abandon array in favor of more readable operations on the signals
   // the output will be contained in motorsOut anyways
   // probably a bad idea to read/write the same place VERY FAST
@@ -95,5 +94,7 @@ void controlTransfer(const unsigned int *txSignal, unsigned int *motorsOut) {
   motorsOut[1] = M2;
   motorsOut[2] = M3;
   motorsOut[3] = M4;
+  */
+
 }
 
