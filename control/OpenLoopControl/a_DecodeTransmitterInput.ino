@@ -45,8 +45,11 @@
   void(* resetFunc) (void) = 0; //declare reset function @ address 0
 */
   //--Observed limits of the raw tx input signals. Same for each channel.
-  const unsigned int kState0Min = 1036; // min value for state 1
-  const unsigned int kState0Max = 1872; // max value for state 1
+  const unsigned int kState0Min = 1068; // min value for state 1
+  const unsigned int kState0Max = 1868; // max value for state 1
+  /* NOTE: The observed limits are slightly wider than above. However, the
+  arithmetic works best so that each Mode 2 stick has a range of 200 positions.*/
+
   //--Desired limits of tx signal (mapped from raw)
   const unsigned int kState1Min = kState0Min / 4; // 266 // min for state 2
   const unsigned int kState1Max = kState0Max / 4; // 468 // max for state 2 
