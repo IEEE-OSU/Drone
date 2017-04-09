@@ -51,17 +51,6 @@ Servo ESC2;//motor2;
 Servo ESC3;//motor3;
 Servo ESC4;//motor4;
 
-// output pins must be PWM enabled pins.
-/*
-#ifndef MOTOR_PINS
-  #define MOTOR_PINS
-  const unsigned int ESC1pin = 5;
-  const unsigned int ESC2pin = 6;
-  const unsigned int ESC3pin = 7;
-  const unsigned int ESC4pin = 8;
-#endif
-*/
-
 // ~A8. Servo limits
 /* NOTES: When calibrating the electronic speed controllers (ESCs), it was found
     that an ESC will accept a servo value ranging from 20 to 180. If it is
@@ -72,8 +61,19 @@ Servo ESC4;//motor4;
 //  and   2000 = fully CW (speeds) (usually is the max speed)
 const unsigned int kServoMin = 1200;//20;
 const unsigned int kServoMax = 1500;//180;
-//const unsigned int kServoMin = 20;//20;
-//const unsigned int kServoMax = 180;//180;
+
+// Motors have imbalances; we will use different servo ranges to compensate. 
+// we want to make sure motors speeds between each motor is the same for a
+// given servo output value.
+const int kESC1min = kServoMin + 0;
+const int kESC2min = kServoMin + 0;
+const int kESC3min = kServoMin + 0;
+const int kESC4min = kServoMin + 0;
+// maximum values for each motor
+const int kESC1min = kServoMax - 0;
+const int kESC2min = kServoMax + 0;
+const int kESC3min = kServoMax + 0;
+const int kESC4min = kServoMax + 0;
 
 /*
     ===============================================================================
@@ -87,17 +87,17 @@ const unsigned int kServoMax = 1500;//180;
 // setup code for motor controls
 void initMotorControl() {
   attachAllMotors();
-  ESC1.writeMicroseconds(kServoMin);
-  ESC2.writeMicroseconds(kServoMin);
-  ESC3.writeMicroseconds(kServoMin);
-  ESC4.writeMicroseconds(kServoMin);
+  ESC1.writeMicroseconds(kESC1min);
+  ESC2.writeMicroseconds(kESC2min);
+  ESC3.writeMicroseconds(kESC3min);
+  ESC4.writeMicroseconds(kESC4min);
 }
 
 void attachAllMotors() {
-  ESC1.attach(ESC1pin, kServoMin, kServoMax);
-  ESC2.attach(ESC2pin, kServoMin, kServoMax);
-  ESC3.attach(ESC3pin, kServoMin, kServoMax);
-  ESC4.attach(ESC4pin, kServoMin, kServoMax);
+  ESC1.attach(ESC1pin, kESC1min, kESC1max);
+  ESC2.attach(ESC2pin, kESC2min, kESC2max);
+  ESC3.attach(ESC3pin, kESC3min, kESC3max);
+  ESC4.attach(ESC4pin, kESC4min, kESC4max);
 }
 
 void disconnectAllMotors() {
@@ -117,9 +117,9 @@ void powerMotors(unsigned int *motorsOut) {
 }
 
 void setMotorsToMin() {
-  ESC1.writeMicroseconds(kServoMin);
-  ESC2.writeMicroseconds(kServoMin);
-  ESC3.writeMicroseconds(kServoMin);
-  ESC4.writeMicroseconds(kServoMin);
+  ESC1.writeMicroseconds(kESC1Min);
+  ESC2.writeMicroseconds(kESC2Min);
+  ESC3.writeMicroseconds(kESC3Min);
+  ESC4.writeMicroseconds(kESC4Min);
 }
 
