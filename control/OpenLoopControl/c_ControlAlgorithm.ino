@@ -51,17 +51,36 @@ void controlTransfer(const unsigned int *txSignal, unsigned int *motorsOut) {
   
   // Transform to state 4 (skip 3); map values from 0 to state 3 resolution
   // to get lower bound of txSignal to be 0 to $STATE3_MAX_VALUE
-  NT = T - kState1Min;
-  NP = constrain(P - kState1Min - kState3Midpoint,-NT/2,NT/2);
-  NR = constrain(R - kState1Min - kState3Midpoint,-NT/2,NT/2);
-  NY = constrain(Y - kState1Min - kState3Midpoint,-NT/2,NT/2);
+  NT = T;
+  NP = constrain(P - 100,-NT/2,NT/2);
+  NR = constrain(R - 100,-NT/2,NT/2);
+  NY = constrain(Y - 100,-NT/2,NT/2);
+
+    //DEBUG print N[T-P]
+/*      Serial.print("Throttle: "); Serial.print(NT); Serial.print("\t");
+  Serial.print("Roll: \t");   Serial.print(NR);     Serial.print("\t");
+  Serial.print("Pitch: ");    Serial.print(NP);    Serial.print("\t");
+  Serial.print("Yaw: \t");    Serial.print(NY);      Serial.print("\t");
+  Serial.println();*/
+    
+    
+    
     // Ensures that no commands are executed which would give invalid Servo numbers.
   // state 4 achieved
-    
-  M1 = NT + NP + NY + kServoMin;
-  M2 = NT + NR - NY + kServoMin;
-  M3 = NT - NP + NY + kServoMin;
-  M4 = NT - NR - NY + kServoMin;
+
+  
+  M1 = NT - NP + NY + kServoMin;
+  M2 = NT - NR - NY + kServoMin;
+  M3 = NT + NP + NY + kServoMin;
+  M4 = NT + NR - NY + kServoMin;
+  
+  /*
+  M1 = NT + kServoMin;
+  M2 = NT + kServoMin;
+  M3 = NT + kServoMin;
+  M4 = NT + kServoMin;
+  */
+  
   /* NOTE: This gives a potential value of any motor speed between 1200 and 1600.
   in Servo microseconds. We have calibrated the ESCs for 2000, which indicates a
   difference between 0% and 50% power at any given time. If one desired to use the
@@ -71,7 +90,6 @@ void controlTransfer(const unsigned int *txSignal, unsigned int *motorsOut) {
   motorsOut[0] = M1;
   motorsOut[1] = M2;
   motorsOut[2] = M3;
-  motorsOut[3] = M4;
-  */
-
+  motorsOut[3] = M4; 
+  
 }

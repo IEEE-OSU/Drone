@@ -60,7 +60,7 @@ void loop() {
     setMotorsToMin();
     skipControlTransfer = true;
   } else  {
-//    printTxSignals(quadSignal); // uncomment to see tx signals
+    //printTxSignals(quadSignal); // uncomment to see tx signals
   }
    
   //--Tranform Tx signal to motor speed settings.
