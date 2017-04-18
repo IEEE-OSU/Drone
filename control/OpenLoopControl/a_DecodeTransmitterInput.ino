@@ -25,7 +25,7 @@
 
   //--Dead zone constant: this  +- scaledInAvg defines dead 
   //  zone range. Inputs in this range will revert back to scaledInAvg.
-  const unsigned int kDeadZone = 3;
+  const unsigned int kDeadZone = 50;
   
   volatile boolean ISRcomplete; // true at end of a particular tx signal cycle
 
@@ -45,26 +45,26 @@
   void(* resetFunc) (void) = 0; //declare reset function @ address 0
 */
   //--Observed limits of the raw tx input signals. Same for each channel.
-  const unsigned int kState0Min = 1068; // min value for state 1
-  const unsigned int kState0Max = 1868; // max value for state 1
+  const int kState0Min = 1068; // min value for state 1
+  const int kState0Max = 1868; // max value for state 1
   /* NOTE: The observed limits are slightly wider than above. However, the
   arithmetic works best so that each Mode 2 stick has a range of 200 positions.*/
 
   //--Desired limits of tx signal (mapped from raw)
-  const unsigned int kState1Min = kState0Min / 4; // 266 // min for state 2
-  const unsigned int kState1Max = kState0Max / 4; // 468 // max for state 2 
+  const  int kState1Min = kState0Min / 4; // 266 // min for state 2
+  const  int kState1Max = kState0Max / 4; // 468 // max for state 2 
 
 // ~A4. Scaled raw input average
 //--defines the average "midpoint" between the two scaled input limits.
 //  used to center Roll, Pitch and Yaw at 0 eventually.
-  const unsigned int scaledInAvg = (kState1Max + kState1Min) / 2;
+  const  int scaledInAvg = (kState0Max + kState0Min) / 2;
 
 //--The raw input states from the Interrupt Service Routine (ISR)
 //  functions. They will eventually be constrained by [kState0Min, kState0Max].
-  volatile unsigned int rawInThrottle = 0;
-  volatile unsigned int rawInYaw    = 0;
-  volatile unsigned int rawInPitch  = 0;
-  volatile unsigned int rawInRoll   = 0;
+  volatile  int rawInThrottle = 0;
+  volatile  int rawInYaw    = 0;
+  volatile  int rawInPitch  = 0;
+  volatile  int rawInRoll   = 0;
 
 //--Values of throttle, roll, pitch, yaw are determined by length of their 
 //  pulse. Measured using the rise/fall time of each ISRs below.
@@ -155,14 +155,17 @@ void checkForSignalLoss() {
  */
 void processTxSignal(unsigned int *txSignal) {
     //txSignal[4] = Roll, pitch , throttle, yaw  
-    txSignal[0] = deadZone(constrain(rawInRoll / 4, kState1Min, kState1Max));  
-    txSignal[1] = deadZone(constrain(rawInPitch/4,  kState1Min, kState1Max));
-    txSignal[2] = constrain(rawInThrottle/4,        kState1Min, kState1Max);
-    txSignal[3] = deadZone(constrain(rawInYaw / 4,  kState1Min, kState1Max));
+    txSignal[0] = deadZone(constrain(rawInRoll, kState0Min, kState0Max) - kState0Min) / 4;
+    txSignal[1] = deadZone(constrain(rawInPitch, kState0Min, kState0Max) - kState0Min) / 4;
+    txSignal[2] = (constrain(rawInThrottle, kState0Min, kState0Max) - kState0Min) / 4;
+    txSignal[3] = deadZone(constrain(rawInYaw, kState0Min, kState0Max) - kState0Min) / 4;
+
+
+    
 }
 
 // ~C2.1 deadZone
-unsigned int deadZone(unsigned int scaledIn) {
+unsigned int deadZone(int scaledIn) {
   return (abs(scaledIn - scaledInAvg) <= kDeadZone) ? scaledInAvg: scaledIn;
 }  
 

@@ -70,10 +70,10 @@ const int kESC2min = kServoMin + 0;
 const int kESC3min = kServoMin + 0;
 const int kESC4min = kServoMin + 0;
 // maximum values for each motor
-const int kESC1min = kServoMax - 0;
-const int kESC2min = kServoMax + 0;
-const int kESC3min = kServoMax + 0;
-const int kESC4min = kServoMax + 0;
+const int kESC1max = kServoMax - 0;
+const int kESC2max = kServoMax + 0;
+const int kESC3max = kServoMax + 0;
+const int kESC4max = kServoMax + 0;
 
 /*
     ===============================================================================
@@ -117,9 +117,9 @@ void powerMotors(unsigned int *motorsOut) {
 }
 
 void setMotorsToMin() {
-  ESC1.writeMicroseconds(kESC1Min);
-  ESC2.writeMicroseconds(kESC2Min);
-  ESC3.writeMicroseconds(kESC3Min);
-  ESC4.writeMicroseconds(kESC4Min);
+  ESC1.writeMicroseconds(kESC1min);
+  ESC2.writeMicroseconds(kESC2min);
+  ESC3.writeMicroseconds(kESC3min);
+  ESC4.writeMicroseconds(kESC4min);
 }
 
