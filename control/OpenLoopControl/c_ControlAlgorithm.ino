@@ -51,8 +51,8 @@ void controlTransfer(const unsigned int *txSignal, unsigned int *motorsOut) {
   
   // Transform to state 4 (skip 3); map values from 0 to state 3 resolution
   // to get lower bound of txSignal to be 0 to $STATE3_MAX_VALUE
-  NT = T;
-  NP = constrain(P - 100,-NT/2,NT/2);
+  NT = 2*T; // Multiply this number to increase speed
+  NP = constrain(P - 100,-NT/2,NT/2); 
   NR = constrain(R - 100,-NT/2,NT/2);
   NY = constrain(Y - 100,-NT/2,NT/2);
 

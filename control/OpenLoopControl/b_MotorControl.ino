@@ -60,7 +60,7 @@ Servo ESC4;//motor4;
 //  where 1000 = fully CCW; (NEEDS TO BE EXPERIMENTALLY VERIFIED)
 //  and   2000 = fully CW (speeds) (usually is the max speed)
 const unsigned int kServoMin = 1200;//20;
-const unsigned int kServoMax = 1500;//180;
+const unsigned int kServoMax = 2000; // MAX is 2000, safe is 1500
 
 // Motors have imbalances; we will use different servo ranges to compensate. 
 // we want to make sure motors speeds between each motor is the same for a
