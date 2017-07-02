@@ -12,10 +12,6 @@
  GND ----------------------- GND
 */
 
-
-
-
-
 void configIMU(){
   
   imu.setSensors(INV_XYZ_GYRO); // Enable gyroscope 
@@ -53,6 +49,10 @@ void updateGyro(){
     gyroY = imu.calcGyro(imu.gy);
     gyroZ = imu.calcGyro(imu.gz);
 
+    // Also update the gyroSignal vector
+    gyroSignal[0] = (double) gyroX;
+    gyroSignal[1] = (double) gyroY;
+    gyroSignal[2] = (double) gyroZ;
 
 }
 

@@ -59,7 +59,10 @@
   PID rollPID(&rollInput, &rollOutput, &rollSetpoint, rollKp, rollKi, rollKd, DIRECT);
   PID yawPID(&yawInput, &yawOutput, &yawSetpoint, yawKp, yawKi, yawKd, DIRECT);
 
-  bool toggle = 1; // PID loops are 1: ON, 0: OFF
+  // Create object references
+  unsigned int pitchRef = &pitchPID;
+  unsigned int rollRef = &rollPID;
+  unsigned int yawRef = &yawPID;
 
                         
 //--Setup to run once. 
@@ -125,33 +128,7 @@ void loop() {
   }
     
   }
-
-   if (toggle) {
-    pitchPID.SetMode(AUTOMATIC);
-    rollPID.SetMode(AUTOMATIC);
-    yawPID.SetMode(AUTOMATIC);
-   }
-   else {
-    pitchPID.SetMode(MANUAL);
-    rollPID.SetMode(MANUAL);
-    yawPID.SetMode(MANUAL);    
-   }
- 
-  // Update the inputs signals
-  pitchInput = 100*gyroSignal[0]/maxSpeedCommand;
-  rollInput = 100*gyroSignal[1]/maxSpeedCommand;
-  yawInput = 100*gyroSignal[2]/maxSpeedCommand;
-
-  // Update the setpoints
-  pitchSetpoint = (double) quadSignal[PITCH];
-  rollSetpoint = (double) quadSignal[ROLL];
-  yawSetpoint = (double) quadSignal[YAW];  
-
-  // Compute the new output
-  pitchPID.Compute();
-  rollPID.Compute();
-  yawPID.Compute();
- 
+   
   //--Tranform Tx signal to motor speed settings.
   //--TODO: implement new control algorithm
   if(skipControlTransfer) {
@@ -166,7 +143,6 @@ void loop() {
   if(!TxSignalError && ENABLE_MOTORS) {
     powerMotors(motorSpeeds);
   }
-
 }
 
 //--Probably unnecessary b/c quad will rarely be shutdown in a civil manner.
@@ -210,18 +186,40 @@ void printGyroValues(){
               String(gyroY) + ", " + String(gyroZ) + " dps");
 }
 
-//void togglePIDs(bool toggle, unsigned int *pitchRef) {
-//  /* togglePIDs will either enable or disable the PID loops, based upon the value of the
-//   *  toggle: false for off, and true for on.
-//   */
-//   
-//}
-//
-//void runPIDs(unsigned int &txSignal, double &gyroSignal, double maxSpeedCommand) {
-//  /* runPIDs will compute the next output from previous states iteratively.
-//   *  
-//   */
-//   
-//
-//}
+void togglePIDs(bool toggle, pitchPID) {
+  /* togglePIDs will either enable or disable the PID loops, based upon the value of the
+   *  toggle: false for off, and true for on.
+   */
+   if (toggle) {
+    pitchPID.SetMode(AUTOMATIC);
+    rollPID.SetMode(AUTOMATIC);
+    yawPID.SetMode(AUTOMATIC);
+   }
+   else {
+    pitchPID.SetMode(MANUAL);
+    rollPID.SetMode(MANUAL);
+    yawPID.SetMode(MANUAL);    
+   }
+}
+
+void runPIDs(unsigned int &txSignal, double &gyroSignal, double maxSpeedCommand) {
+  /* runPIDs will compute the next output from previous states iteratively.
+   *  
+   */
+   
+  // Update the inputs signals
+  pitchInput = 100*gyroSignal[0]/maxSpeedCommand;
+  rollInput = 100*gyroSignal[1]/maxSpeedCommand;
+  yawInput = 100*gyroSignal[2]/maxSpeedCommand;
+
+  // Update the setpoints
+  pitchSetpoint = (double) txSignal[PITCH];
+  rollSetpoint = (double) txSignal[ROLL];
+  yawSetpoint = (double) txSignal[YAW];  
+
+  // Compute the new output
+  pitchPID.Compute();
+  rollPID.Compute();
+  yawPID.Compute();
+}
 

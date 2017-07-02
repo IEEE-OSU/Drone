@@ -1,0 +1,102 @@
+/* e_ClosedLoopFeedback.ino
+
+    Authors: Roger Kassouf, Iwan Martin
+
+    Date last modified: 2017-06-26
+
+    Objective: Using IMU feedback and commands from the transmitter,
+    compute a new control input using the PIDLibary library
+
+    INPUTS: 
+      tx signals: [ROLL, PITCH, THROTTLE, YAW]
+      IMU signals: Gryoscope in X, Y, and Z (deg/s or dps)
+    
+    OUTPUTS: An update input signal for the open-loop ControlAlgorithm
+    
+    Notes: Functions run inside the main tab will redirect to here. This
+           intends to "close the loop" so that the original control
+           algorithm may run as it did before.
+   
+  _   _   _  __          __     _____  _   _ _____ _   _  _____   _   _   _ 
+ | | | | | | \ \        / /\   |  __ \| \ | |_   _| \ | |/ ____| | | | | | |
+ | | | | | |  \ \  /\  / /  \  | |__) |  \| | | | |  \| | |  __  | | | | | |
+ | | | | | |   \ \/  \/ / /\ \ |  _  /| . ` | | | | . ` | | |_ | | | | | | |
+ |_| |_| |_|    \  /\  / ____ \| | \ \| |\  |_| |_| |\  | |__| | |_| |_| |_|
+ (_) (_) (_)     \/  \/_/    \_\_|  \_\_| \_|_____|_| \_|\_____| (_) (_) (_)
+                                                                            
+                                                                            
+   Closed loop feedback may result in unexpected motion behavior due to
+   potentially unstable feedback mechanisms. Please ensure that there is
+   a way to kill power if necessary. Before changning control loop gains,
+   please test first using the Simulink model to ensure stability.
+   
+*/
+
+void loadPIDparams() {
+  /* loadPIDparams will load all of the parameters required by the control loops.
+   *  Code stage to activate: before setup() method
+   */
+
+  //Define Variables we'll be connecting to
+  double pitchSetpoint, pitchInput, pitchOutput;
+  double rollSetpoint, rollInput, rollOutput;
+  double yawSetpoint, yawInput, yawOutput;
+
+  //Specify the links and initial tuning parameters
+  double pitchKp=1, pitchKi=0, pitchKd=1;
+  double rollKp=1, rollKi=0, rollKd=1;
+  double yawKp=1, yawKi=0, yawKd=1;
+
+  // Declare PID objects
+  PID pitchPID(&pitchInput, &pitchOutput, &pitchSetpoint, pitchKp, pitchKi, pitchKd, DIRECT);
+  PID rollPID(&rollInput, &rollOutput, &rollSetpoint, rollKp, rollKi, rollKd, DIRECT);
+  PID yawPID(&yawInput, &yawOutput, &yawSetpoint, yawKp, yawKi, yawKd, DIRECT);
+
+  pitchPID.SetOutputLimits(-100,100);
+  rollPID.SetOutputLimits(-100,100);
+  yawPID.SetOutputLimits(-100,100);
+
+  // Currently set for 10 ms, see if 1ms works later
+  pitchPID.SetSampleTime(10);
+  rollPID.SetSampleTime(10);
+  yawPID.SetSampleTime(10);
+
+}
+
+void togglePIDs(bool toggle) {
+  /* togglePIDs will either enable or disable the PID loops, based upon the value of the
+   *  toggle: false for off, and true for on.
+   */
+   if toggle {
+    pitchPID.SetMode(AUTOMATIC);
+    rollPID.SetMode(AUTOMATIC);
+    yawPID.SetMode(AUTOMATIC);
+   }
+   else {
+    pitchPID.SetMode(MANUAL);
+    rollPID.SetMode(MANUAL);
+    yawPID.SetMode(MANUAL);    
+   }
+}
+
+void runPIDs(unsigned int *txSignal, double *gyroSignal, double maxSpeedCommand) {
+  /* runPIDs will compute the next output from previous states iteratively.
+   *  
+   */
+   
+  // Update the inputs signals
+  pitchInput = 100*gyroSignal[0]/maxSpeedCommand;
+  rollInput = 100*gyroSignal[1]/maxSpeedCommand;
+  yawInput = 100*gyroSignal[2]/maxSpeedCommand;
+
+  // Update the setpoints
+  pitchSetpoint = double(txSignal[PITCH]);
+  rollSetpoint = txSignal[ROLL];
+  yawSetpoint = txSignal[YAW];  
+
+  // Compute the new output
+  pitchPID.Compute();
+  rollPID.Compute();
+  yawPID.Compute();
+}
+

@@ -35,22 +35,7 @@ const int kRotationsBound = (kThrottleBound/2)-1; // 100
  *  INPUT:  txSignal  = [R2 P2 Y2 T2], 2 denotes state 2 of values
  *  OUTPUT: motorsOut = [M1 M2 M3 M4]
  */
-
-  void const2motors() {
-    M1 = NT - NP + NY + kServoMin;
-    M2 = NT - NR - NY + kServoMin;
-    M3 = NT + NP + NY + kServoMin;
-    M4 = NT + NR - NY + kServoMin;
-  }
-
-  void cmds2const() {
-    NT = T;
-    NP = constrain(P - 100,-NT/2,NT/2);
-    NR = constrain(R - 100,-NT/2,NT/2);
-    NY = constrain(Y - 100,-NT/2,NT/2);
-  }
-
-void controlTransfer(unsigned int *txSignal, unsigned int *motorsOut, double *gyroSignal, unsigned int controlMode) {
+void controlTransfer(const unsigned int *txSignal, unsigned int *motorsOut, unsigned int controlMode) {
   // abandon array in favor of more readable operations on the signals
   // the output will be contained in motorsOut anyways
   // probably a bad idea to read/write the same place VERY FAST
@@ -59,10 +44,10 @@ void controlTransfer(unsigned int *txSignal, unsigned int *motorsOut, double *gy
   P = txSignal[PITCH];
   Y = txSignal[YAW];
 
-
   switch (controlMode) {
     case 0: // Throttle-Only Mode
-          
+      togglePIDs(0);
+      
       NT = T;
       
       M1 = NT + kServoMin;
@@ -71,18 +56,45 @@ void controlTransfer(unsigned int *txSignal, unsigned int *motorsOut, double *gy
       M4 = NT + kServoMin;
       break;
     case 1: // Open Loop Control
-
-      cmds2const();
-      const2motors();
+      togglePIDs(0);
       
+      NT = T;
+      NP = constrain(P - 100,-NT/2,NT/2);
+      NR = constrain(R - 100,-NT/2,NT/2);
+      NY = constrain(Y - 100,-NT/2,NT/2);
+
+      M1 = NT - NP + NY + kServoMin;
+      M2 = NT - NR - NY + kServoMin;
+      M3 = NT + NP + NY + kServoMin;
+      M4 = NT + NR - NY + kServoMin;
       break;
     case 2: // Closed Loop Control
-
-      cmds2const();
-      const2motors();
+      togglePIDs(1);
+      computePIDs();
       
+      NT = T;
+      NP = constrain(P - 100,-NT/2,NT/2);
+      NR = constrain(R - 100,-NT/2,NT/2);
+      NY = constrain(Y - 100,-NT/2,NT/2);
+
+      M1 = NT - NP + NY + kServoMin;
+      M2 = NT - NR - NY + kServoMin;
+      M3 = NT + NP + NY + kServoMin;
+      M4 = NT + NR - NY + kServoMin;
       break;      
   }
+
+  void cmds2const() {
+    
+  }
+  
+  // Transform to state 4 (skip 3); map values from 0 to state 3 resolution
+  // to get lower bound of txSignal to be 0 to $STATE3_MAX_VALUE
+  NT = T;
+  NP = constrain(P - 100,-NT/2,NT/2);
+  NR = constrain(R - 100,-NT/2,NT/2);
+  NY = constrain(Y - 100,-NT/2,NT/2);
+
     //DEBUG print N[T-P]
 /*      Serial.print("Throttle: "); Serial.print(NT); Serial.print("\t");
   Serial.print("Roll: \t");   Serial.print(NR);     Serial.print("\t");
@@ -105,7 +117,5 @@ void controlTransfer(unsigned int *txSignal, unsigned int *motorsOut, double *gy
   motorsOut[1] = M2;
   motorsOut[2] = M3;
   motorsOut[3] = M4; 
-
+  
 }
-
-
