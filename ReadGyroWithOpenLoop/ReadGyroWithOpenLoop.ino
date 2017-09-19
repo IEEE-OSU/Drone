@@ -85,7 +85,7 @@ void loop() {
       printGyroValues(); // Uncomment to print raw gyro values
     }
     else {
-    Serial.print("DMP Update Fifo error"); Serial.println(micros());
+    // Serial.print("DMP Update Fifo error"); Serial.println(micros());
     }
   }
     

@@ -72,9 +72,9 @@ void controlTransfer(const unsigned int *txSignal, unsigned int *motorsOut) {
   //DEBUG set motors to throttle
 
   M1 = NT*5 + kServoMin;
-  M2 =  kServoMin;
-  M3 =  kServoMin;
-  M4 =  kServoMin;
+  M2 = NT*5 + kServoMin;
+  M3 = NT*5 + kServoMin;
+  M4 = NT*5 + kServoMin;
   
   /*
   M1 = NT - NP + NY + kServoMin;
@@ -98,8 +98,8 @@ void controlTransfer(const unsigned int *txSignal, unsigned int *motorsOut) {
   // Step 5: Re-map the speed values to each motor
 
   //DEBUG Print current motor output
-//  Serial.print("Motor Raw: ");
-//  Serial.println(NT*5);
+  Serial.print("Motor Raw: ");
+  Serial.println(NT*5);
   
   motorsOut[0] = M1;
   motorsOut[1] = M2;
